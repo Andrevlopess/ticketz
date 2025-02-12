@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import UserCard from "@/components/users/user-card";
 import { prisma } from "@/lib/prisma";
 import type { User } from "@prisma/client";
@@ -32,4 +33,12 @@ export default async function Page() {
       </div>
     </div>
   );
+=======
+import React from 'react'
+
+export default function page() {
+  return (
+    <div>page</div>
+  )
+>>>>>>> 12cd4bea8082192963452b50594028ed6f646678
 }
