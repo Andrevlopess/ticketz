@@ -1,0 +1,146 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  USER
+}
+
+enum NoteType {
+  PUBLIC
+  PRIVATE
+}
+
+model Company {
+  id          Int     @id @default(autoincrement())
+  name        String  @unique
+  logo        String?
+  description String?
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  deletedAt DateTime? @map("deleted_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  User      User?     @relation(fields: [userId], references: [id])
+  userId    Int?
+  Ticket    Ticket[]
+
+  @@map("companies")
+}
+
+model User {
+  id         Int       @id @default(autoincrement())
+  email      String    @unique
+  first_name String
+  last_name  String?
+  photo      String?   @map("photo_url")
+  phone      String?
+  password   String
+  role       Role      @default(USER)
+  company    Company[]
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  deletedAt DateTime? @map("deleted_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  createdTickets  Ticket[]      @relation("CreatedTickets")
+  resolvedTickets Ticket[]      @relation("ResolvedTickets")
+  TicketNotes     TicketNotes[]
+
+  @@map("users")
+}
+
+model Ticket {
+  id            Int      @id @default(autoincrement())
+  subject       String
+  content       String?
+  Status        Status   @relation(fields: [statusId], references: [id])
+  Tags          Tag[]    @relation("TicketTags") 
+  groupId       Int
+  group         Group    @relation(fields: [groupId], references: [id])
+  Priority      Priority @relation(fields: [priorityId], references: [id])
+  Company       Company  @relation(fields: [companyId], references: [id])
+  companyId     Int
+  statusId      Int
+  priorityId    Int
+  ticketNotesId Int?
+
+  creator   User          @relation("CreatedTickets", fields: [creatorId], references: [id])
+  creatorId Int
+  solvers   User[]        @relation("ResolvedTickets")
+  notes     TicketNotes[]
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  @@map("tickets")
+}
+
+model TicketNotes {
+  id      Int    @id @default(autoincrement())
+  content String @unique
+
+  Ticket   Ticket @relation(fields: [ticketId], references: [id])
+  ticketId Int
+
+  Creator   User? @relation(fields: [creatorId], references: [id])
+  creatorId Int?
+
+  noteType NoteType @default(PRIVATE)
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  deletedAt DateTime? @map("deleted_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  @@map("ticket_notes")
+}
+
+model Tag {
+  id         Int      @id @default(autoincrement())
+  name       String   @unique
+  created_at DateTime @default(now())
+  Ticket     Ticket[] @relation("TicketTags")
+
+  @@map("tags")
+}
+
+model Status {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  deletedAt DateTime? @map("deleted_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  Ticket Ticket[]
+
+  @@map("statuses")
+}
+
+model Group {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  tickets   Ticket[] // 1-n relationship with Ticket
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  @@map("groups")
+}
+
+model Priority {
+  id         Int      @id @default(autoincrement())
+  name       String
+  created_at DateTime @default(now())
+
+  Ticket Ticket[]
+
+  @@map("priorities")
+}
