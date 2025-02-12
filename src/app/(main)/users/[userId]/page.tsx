@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import UserDetailsView from "@/components/users/user-details";
 import { prisma } from "@/lib/prisma";
 import { Metadata } from "next";
@@ -21,7 +20,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!user) {
     return {
       title: "Usuário não encontrado",
-      
     };
   }
 
@@ -49,16 +47,4 @@ export default async function Page({ params }: Props) {
       <UserDetailsView user={user} />
     </>
   );
-=======
-
-import UserDetailsContainer from "@/components/users/user-details";
-import { getUser } from "./actions";
-
-export default async function Page({ params }: { params: Promise<{ userId: string }> }) {
-  
-  const id = (await params).userId;
-  const userPromise = getUser(id);
-  
-  return <UserDetailsContainer promise={userPromise} />;
->>>>>>> 12cd4bea8082192963452b50594028ed6f646678
 }
