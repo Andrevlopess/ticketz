@@ -1,19 +1,19 @@
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarRight } from "@/components/sidebar-right";
-import { NewTicketForm } from "@/components/ticket/new-ticket-form";
+import { NewTicketForm } from "@/components/ticket/new-ticket-form/form";
 import {
-    Breadcrumb,
-    BreadcrumbItem,
-    BreadcrumbList,
-    BreadcrumbPage,
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbList,
+  BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import {
-    SidebarInset,
-    SidebarProvider,
-    SidebarTrigger,
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
 } from "@/components/ui/sidebar";
 
 export default function Page() {

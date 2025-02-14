@@ -6,30 +6,25 @@ import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "../ui/textarea";
+import { useActionState, useRef } from "react";
+import { Textarea } from "../../ui/textarea";
+import { onSubmitAction } from "./action";
+import { formSchema } from "./schema";
 
-const formSchema = z.object({
-  subject: z.string().min(2, {
-    message: "Subject must be at least 2 characters.",
-  }),
-  content: z.string().min(2, {
-    message: "Content must be at least 2 characters.",
-  }),
-  priority: z.enum(["low", "medium", "high"]),
-  tags: z.array(z.string()),
-  group: z.string().optional(),
-  solver: z.string().optional(),
-});
 
 export function NewTicketForm() {
+  const [formState, formAction] = useActionState(onSubmitAction, {
+    success: false,
+  });
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -39,8 +34,11 @@ export function NewTicketForm() {
       tags: [],
       group: "",
       solver: "",
+      ...(state?.fields ?? {}),
     },
   });
+
+  const formRef = useRef<HTMLFormElement>(null);
 
   // 2. Define a submit handler.
   function onSubmit(values: z.infer<typeof formSchema>) {
@@ -51,7 +49,17 @@ export function NewTicketForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+
+      <form
+        ref={formRef}
+        action={formAction}
+        onSubmit={(evt) => {
+          evt.preventDefault();
+          form.handleSubmit(() => {
+            formAction(new FormData(formRef.current!));
+          })(evt);
+        }}
+        className="space-y-8">
         <FormField
           control={form.control}
           name="subject"
