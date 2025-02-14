@@ -1,17 +1,21 @@
-import { AppSidebar } from "@/components/app-sidebar"
-import { SidebarRight } from "@/components/sidebar-right"
+import { AppSidebar } from "@/components/app-sidebar";
+import { SidebarRight } from "@/components/sidebar-right";
+import TicketsList from "@/components/ticket/ticket-list";
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbList,
   BreadcrumbPage,
-} from "@/components/ui/breadcrumb"
-import { Separator } from "@/components/ui/separator"
+} from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
+import Link from "next/link";
 
 export default function Page() {
   return (
@@ -32,13 +36,20 @@ export default function Page() {
               </BreadcrumbList>
             </Breadcrumb>
           </div>
+          <div className="px-3 flex gap-2 items-center">
+            <Input type="search" placeholder="Search" className="w-full" />
+            <Button variant="outline" className="" asChild>
+              <Link href={"/tickets/new"}>New Ticket</Link>
+            </Button>
+          </div>
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4">
-          <div className="mx-auto h-24 w-full max-w-3xl rounded-xl bg-muted/50" />
-          <div className="mx-auto h-[100vh] w-full max-w-3xl rounded-xl bg-muted/50" />
+          <TicketsList />
+          {/* <div className="mx-auto h-24 w-full max-w-5xl rounded-xl bg-muted/50" />
+          <div className="mx-auto h-[100vh] w-full max-w-5xl rounded-xl bg-muted/50" /> */}
         </div>
       </SidebarInset>
       <SidebarRight />
     </SidebarProvider>
-  )
+  );
 }

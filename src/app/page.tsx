@@ -1,4 +1,3 @@
-import UsersList from "@/components/UsersList";
 import { Suspense } from "react";
 
 export default function Home() {
