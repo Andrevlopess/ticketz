@@ -38,7 +38,7 @@ model User {
   id         Int       @id @default(autoincrement())
   email      String    @unique
   first_name String
-  last_name  String?
+  last_name  String
   photo      String?   @map("photo_url")
   phone      String?
   password   String
@@ -63,7 +63,7 @@ model Ticket {
   Status        Status   @relation(fields: [statusId], references: [id])
   Tags          Tag[]    @relation("TicketTags") 
   groupId       Int
-  group         Group    @relation(fields: [groupId], references: [id])
+  Group         Group    @relation(fields: [groupId], references: [id])
   Priority      Priority @relation(fields: [priorityId], references: [id])
   Company       Company  @relation(fields: [companyId], references: [id])
   companyId     Int
@@ -71,9 +71,9 @@ model Ticket {
   priorityId    Int
   ticketNotesId Int?
 
-  creator   User          @relation("CreatedTickets", fields: [creatorId], references: [id])
+  Creator   User          @relation("CreatedTickets", fields: [creatorId], references: [id])
   creatorId Int
-  solvers   User[]        @relation("ResolvedTickets")
+  Solvers   User[]        @relation("ResolvedTickets")
   notes     TicketNotes[]
 
   createdAt DateTime  @default(now()) @map("created_at")
@@ -93,7 +93,7 @@ model TicketNotes {
   Creator   User? @relation(fields: [creatorId], references: [id])
   creatorId Int?
 
-  noteType NoteType @default(PRIVATE)
+  NoteType NoteType @default(PRIVATE)
 
   createdAt DateTime  @default(now()) @map("created_at")
   deletedAt DateTime? @map("deleted_at")

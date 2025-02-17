@@ -7,8 +7,8 @@ export const formSchema = z.object({
   content: z.string().trim().min(2, {
     message: "Content must be at least 2 characters.",
   }),
-  priority: z.enum(["low", "medium", "high"]),
-  tags: z.array(z.string()),
+  priority: z.string(),
+  tags: z.array(z.string()).optional(),
   group: z.string().optional(),
   solver: z.string().optional(),
 });

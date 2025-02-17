@@ -12,7 +12,7 @@ export default async function TicketsList() {
   console.log(tickets);
 
   return (
-    <div className="mx-auto w-full max-w-5xl gap-2 grid grid-cols-3">
+    <div className="gap-2 grid grid-cols-3 border border-white">
       {tickets.map((ticket) => (
         <TicketPreview key={ticket.id} ticket={ticket} />
       ))}

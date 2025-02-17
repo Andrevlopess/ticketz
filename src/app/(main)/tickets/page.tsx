@@ -1,6 +1,6 @@
-import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarRight } from "@/components/sidebar-right";
-import TicketsList from "@/components/ticket/ticket-list";
+import { ticketsColumns } from "@/components/ticket/data-table/columns";
+import { TicketsDataTable } from "@/components/ticket/data-table/data-table";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -10,17 +10,61 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
+import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
+import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 
-export default function Page() {
+export default async function Page() {
+  const tickets = await prisma.ticket.findMany({
+    take: 10,
+    orderBy: {
+      createdAt: "desc",
+    },
+    select: {
+      id: true,
+      subject: true,
+      content: true,
+      Creator: {
+        select: {
+          id: true,
+          first_name: true,
+          last_name: true,
+          email: true,
+          photo: true,
+        },
+      },
+      Company: {
+        select: {
+          name: true,
+          id: true,
+        },
+      },
+      Priority: {
+        select: {
+          name: true,
+          id: true,
+        },
+      },
+      Group: {
+        select: {
+          name: true,
+          id: true,
+        },
+      },
+      Status: {
+        select: {
+          name: true,
+          id: true,
+        },
+      },
+      createdAt: true,
+    },
+  });
+
+  console.log(tickets);
+
   return (
-    <SidebarProvider>
-      <AppSidebar />
+    <>
       <SidebarInset>
         <header className="sticky top-0 flex h-14 shrink-0 items-center gap-2 bg-background">
           <div className="flex flex-1 items-center gap-2 px-3">
@@ -38,18 +82,16 @@ export default function Page() {
           </div>
           <div className="px-3 flex gap-2 items-center">
             <Input type="search" placeholder="Search" className="w-full" />
-            <Button variant="outline" className="" asChild>
+            <Button className="" asChild>
               <Link href={"/tickets/new"}>New Ticket</Link>
             </Button>
           </div>
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4">
-          <TicketsList />
-          {/* <div className="mx-auto h-24 w-full max-w-5xl rounded-xl bg-muted/50" />
-          <div className="mx-auto h-[100vh] w-full max-w-5xl rounded-xl bg-muted/50" /> */}
+          <TicketsDataTable data={tickets} columns={ticketsColumns} />
         </div>
       </SidebarInset>
       <SidebarRight />
-    </SidebarProvider>
+    </>
   );
 }

@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -14,52 +15,76 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useActionState, useRef } from "react";
+import { Loader2, X } from "lucide-react";
+import { startTransition, useActionState, useEffect, useRef } from "react";
 import { Textarea } from "../../ui/textarea";
-import { onSubmitAction } from "./action";
+import { newTaskAction } from "./actions/new-task-action";
 import { formSchema } from "./schema";
-
+// import { Select } from "react-day-picker";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
 
 export function NewTicketForm() {
-  const [formState, formAction] = useActionState(onSubmitAction, {
+  const { toast } = useToast();
+
+  const [formState, formAction, isPending] = useActionState(newTaskAction, {
     success: false,
   });
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<z.output<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      subject: "Ticket subject",
-      content: "Ticket description",
-      priority: "low",
-      tags: [],
-      group: "",
-      solver: "",
-      ...(state?.fields ?? {}),
+      subject: "",
+      content: "",
+      priority: "3",
+      tags: ["Documentation"],
+      group: "1",
+      solver: "10",
+      ...(formState?.fields ?? {}),
     },
   });
 
   const formRef = useRef<HTMLFormElement>(null);
 
-  // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values);
-  }
+  // if (formState.success) {
+  //   toast({
+  //     title: "Ticket created successfully!",
+  //     description: "Your ticket has been created successfully.",
+  //     // status: "success",
+  //   });
+  // }
+
+  useEffect(() => {
+    if (formState.success) {
+      toast({
+        title: "Ticket created successfully!",
+        description: "Your ticket has been created successfully.",
+        // status: "success",
+      });
+
+      formRef.current?.reset();
+    }
+  }, [formState.success]);
 
   return (
     <Form {...form}>
-
       <form
         ref={formRef}
         action={formAction}
         onSubmit={(evt) => {
           evt.preventDefault();
           form.handleSubmit(() => {
-            formAction(new FormData(formRef.current!));
+            startTransition(() => formAction(new FormData(formRef.current!)));
           })(evt);
         }}
-        className="space-y-8">
+        className="space-y-8"
+      >
         <FormField
           control={form.control}
           name="subject"
@@ -69,10 +94,7 @@ export function NewTicketForm() {
               <FormControl>
                 <Input placeholder="Enter your subject" {...field} />
               </FormControl>
-              {/* <FormDescription>
-                This is your public display name.
-              </FormDescription> */}
-              <FormMessage />
+              <FormMessage>{formState.errors?.subject}</FormMessage>
             </FormItem>
           )}
         />
@@ -85,10 +107,7 @@ export function NewTicketForm() {
               <FormControl>
                 <Textarea placeholder="Enter your content" {...field} />
               </FormControl>
-              {/* <FormDescription>
-                This is your public display name.
-              </FormDescription> */}
-              <FormMessage />
+              <FormMessage>{formState.errors?.content}</FormMessage>
             </FormItem>
           )}
         />
@@ -99,51 +118,72 @@ export function NewTicketForm() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Priority</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter your subject" {...field} />
-                </FormControl>
-                {/* <FormDescription>
-                This is your public display name.
-              </FormDescription> */}
-                <FormMessage />
+                <Select {...field}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a priority" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="1">Low</SelectItem>
+                    <SelectItem value="2">Medium</SelectItem>
+                    <SelectItem value="3">High</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage>{formState.errors?.priority}</FormMessage>
               </FormItem>
+              // <FormItem>
+              //   <FormLabel>Priority</FormLabel>
+
+              //   <FormControl>
+              //     <Textarea placeholder="Enter your content" {...field} />
+              //   </FormControl>
+
+              //   <FormMessage>{formState.errors?.priority}</FormMessage>
+              // </FormItem>
             )}
           />
-          <FormField
+          {/* <FormField
             control={form.control}
             name="group"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Priority</FormLabel>
+                <FormLabel>Group</FormLabel>
                 <FormControl>
                   <Input placeholder="Enter your subject" {...field} />
                 </FormControl>
-                {/* <FormDescription>
-                This is your public display name.
-              </FormDescription> */}
-                <FormMessage />
+                <FormMessage>{formState.errors?.group}</FormMessage>
               </FormItem>
             )}
-          />
-          <FormField
+          /> */}
+          {/* <FormField
             control={form.control}
-            name="priority"
+            name="tags"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Priority</FormLabel>
+                <FormLabel>Group</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter your subject" {...field} />
+                  <TagsSelector />
                 </FormControl>
-                {/* <FormDescription>
-                This is your public display name.
-              </FormDescription> */}
-                <FormMessage />
+                <FormMessage>{formState.errors?.group}</FormMessage>
               </FormItem>
             )}
-          />
+          /> */}
         </div>
 
-        <Button type="submit">Submit</Button>
+        {formState.errors?.error && (
+          <Alert variant="destructive">
+            <X className="h-4 w-4" />
+            <AlertTitle>An error occured!</AlertTitle>
+            <AlertDescription>{formState.errors?.error}</AlertDescription>
+          </Alert>
+        )}
+
+        <Button disabled={isPending} type="submit" className="">
+          {
+            isPending ? <Loader2 className="animate-spin"/> : "Create ticket"
+          }
+        </Button>
       </form>
     </Form>
   );
