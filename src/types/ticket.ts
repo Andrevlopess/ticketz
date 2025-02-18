@@ -1,10 +1,13 @@
 import type { User } from "@prisma/client";
+import { PublicUser } from "./users";
+
+
 
 export type TicketWithDetails = {
   id: number;
   subject: string;
   content: string | null;
-  Creator: Pick<User, "id" | "first_name" | "last_name" | "email" | "photo">;
+  Creator: PublicUser
   Company: {
     name: string;
     id: number;
@@ -21,5 +24,6 @@ export type TicketWithDetails = {
     name: string;
     id: number;
   } | null;
+  Solvers: PublicUser[] | null;
   createdAt: Date;
 };

@@ -57,11 +57,21 @@ export default async function Page() {
           id: true,
         },
       },
+      Solvers: {
+        select: {
+          id: true,
+          first_name: true,
+          last_name: true,
+          email: true,
+          photo: true,
+        },
+      },
       createdAt: true,
     },
   });
 
   console.log(tickets);
+  
 
   return (
     <>

@@ -60,9 +60,6 @@ export function TicketsDataTable<TData, TValue>({
     getFacetedUniqueValues: getFacetedUniqueValues(),
   })
 
-  console.log(table.getAllColumns());
-  
-
   
   return (
     <div className="space-y-4">

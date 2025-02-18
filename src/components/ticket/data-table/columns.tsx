@@ -1,10 +1,11 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import AvatarTooltip, { UsersAvatars } from "@/components/ui/avatar-tooltip";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { TicketWithDetails } from "@/types/ticket";
 import { ColumnDef } from "@tanstack/react-table";
+import Link from "next/link";
 import { priorities, statuses } from "./data";
 import { DataTableColumnHeader } from "./data-table-column-header";
 import { DataTableRowActions } from "./data-table-row-actions";
@@ -34,17 +35,17 @@ export const ticketsColumns: ColumnDef<TicketWithDetails>[] = [
     enableSorting: false,
     enableHiding: false,
   },
-  {
-    accessorKey: "id",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Ticket" />
-    ),
-    cell: ({ row }) => (
-      <div className="w-[70px]">{"#" + row.getValue("id")}</div>
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
+  // {
+  //   accessorKey: "id",
+  //   header: ({ column }) => (
+  //     <DataTableColumnHeader column={column} title="Ticket" />
+  //   ),
+  //   cell: ({ row }) => (
+  //     <div className="w-[60px]">{"#" + row.getValue("id")}</div>
+  //   ),
+  //   enableSorting: false,
+  //   enableHiding: false,
+  // },
   {
     accessorKey: "subject",
     header: ({ column }) => (
@@ -53,27 +54,24 @@ export const ticketsColumns: ColumnDef<TicketWithDetails>[] = [
     cell: ({ row }) => {
       const creator = row.original.Creator;
 
-      const fallbackLetter = creator.first_name[0] + creator.last_name[0];
+      const fallbackLetters = creator.first_name[0] + creator.last_name[0];
 
-      
       return (
         <div className="flex space-x-2">
-          {/* <Badge variant="outline">Subject</Badge> */}
-          <Avatar className="h-8 w-8">
-            {row.original.Creator.photo && (
-              <AvatarImage src={row.original.Creator.photo} alt="@shadcn" />
-            )}
-            <AvatarFallback>{fallbackLetter.toUpperCase()}</AvatarFallback>
-          </Avatar>
-          <div className="flex flex-col">
-
-          <span className="max-w-[400px] truncate font-medium">
-            {row.getValue("subject")}
-          </span>
-          <span className="max-w-[400px] truncate font-medium">
-            {row.getValue("subject")}
-          </span>
-          </div>
+          <Link href={`users/${creator.id}`}>
+            <AvatarTooltip user={creator} />
+          </Link>
+          <Link href={`/tickets/${row.original.id}`}>
+            <div className="flex flex-col items-start group">
+              <div className="flex space-x-2">
+                <p className="text-muted-foreground group-hover:text-secondary-foreground">{`#${row.original.id}`}</p>
+                <Badge variant="outline">Subject</Badge>
+              </div>
+              <span className="max-w-[500px] truncate font-medium group-hover:underline">
+                {row.getValue("subject")}
+              </span>
+            </div>
+          </Link>
         </div>
       );
     },
@@ -129,6 +127,29 @@ export const ticketsColumns: ColumnDef<TicketWithDetails>[] = [
           )}
           <span>{status.label}</span>
         </div>
+      );
+    },
+  },
+  {
+    accessorKey: "solvers",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Solvers" />
+    ),
+    cell: ({ row }) => {
+      const status = statuses.find(
+        (status) => status.id === row.original?.Status?.id
+      );
+
+      if (!status) {
+        return null;
+      }
+
+      const solvers = row.original?.Solvers;
+
+      return !!solvers?.length ? (
+        <UsersAvatars users={solvers} />
+      ) : (
+        <span className="text-muted-foreground">Unassigned</span>
       );
     },
   },
