@@ -1,66 +1,91 @@
-import { AppSidebar } from "@/components/app-sidebar";
-import { SidebarRight } from "@/components/sidebar-right";
-import TicketsList from "@/components/ticket/ticket-list";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
+import TicketView from "@/components/ticket/ticket-view";
+import { prisma } from "@/lib/prisma";
+import { notFound } from "next/navigation";
 
 interface Params {
-  params: Promise<{ id: string }>;
+  id: string;
 }
 
-export default async function Page({ params }: Params) {
+export default async function Page({ params }: { params: Promise<Params> }) {
   const id = (await params).id;
 
+  console.log(parseInt(id));
+
+  if (!parseInt(id)) {
+    return notFound();
+  }
+
+  const ticket = await prisma.ticket.findUnique({
+    where: {
+      id: parseInt(id),
+    },
+    select: {
+      id: true,
+      subject: true,
+      content: true,
+      Creator: {
+        select: {
+          id: true,
+          first_name: true,
+          last_name: true,
+          email: true,
+          photo: true,
+        },
+      },
+      Company: {
+        select: {
+          name: true,
+          id: true,
+        },
+      },
+      Priority: {
+        select: {
+          name: true,
+          id: true,
+        },
+      },
+      Group: {
+        select: {
+          name: true,
+          id: true,
+        },
+      },
+      Status: {
+        select: {
+          name: true,
+          id: true,
+        },
+      },
+      Solvers: {
+        select: {
+          id: true,
+          first_name: true,
+          last_name: true,
+          email: true,
+          photo: true,
+        },
+      },
+      Tags: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+      createdAt: true,
+      deletedAt: true,
+      updatedAt: true,
+    },
+  });
+  // .catch((error) => console.log(error));
+
+  if (!ticket) {
+    return notFound();
+  }
+  console.log(ticket);
+
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset>
-        <header className="sticky top-0 flex h-14 shrink-0 items-center gap-2 bg-background">
-          <div className="flex flex-1 items-center gap-2 px-3">
-            <SidebarTrigger />
-            <Separator orientation="vertical" className="mr-2 h-4" />
-            <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem>
-                  <BreadcrumbLink href="/tickets"> Tickets</BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbPage className="line-clamp-1">
-                    #{id}
-                  </BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
-          </div>
-          <div className="px-3 flex gap-2 items-center">
-            <Input type="search" placeholder="Search" className="w-full" />
-            <Button variant="outline" className="">
-              New Ticket
-            </Button>
-          </div>
-        </header>
-        <div className="flex flex-1 flex-col gap-4 p-4">
-          <TicketsList />
-          <div className="mx-auto h-24 w-full max-w-3xl rounded-xl bg-muted/50" />
-          <div className="mx-auto h-[100vh] w-full max-w-3xl rounded-xl bg-muted/50" />
-        </div>
-      </SidebarInset>
-      <SidebarRight />
-    </SidebarProvider>
+    <div className="mx-auto max-w-5xl w-full">
+      <TicketView ticket={ticket} />
+    </div>
   );
 }

@@ -45,8 +45,8 @@ interface UsersAvatarProps {
 
 export function UsersAvatars({ users, maxUsers = 3 }: UsersAvatarProps) {
   return (
-    <TooltipProvider delayDuration={0}>
-      <div className="flex -space-x-3">
+    <div className="flex -space-x-3">
+      <TooltipProvider delayDuration={0}>
         {users.slice(0, 3).map((user, index) => (
           <Link href={`/users/${user.id}`} key={user.id}>
             <AvatarTooltip user={user} />
@@ -58,7 +58,7 @@ export function UsersAvatars({ users, maxUsers = 3 }: UsersAvatarProps) {
             <AvatarFallback>+{users.length - 3}</AvatarFallback>
           </Avatar>
         )}
-      </div>
-    </TooltipProvider>
+      </TooltipProvider>
+    </div>
   );
 }

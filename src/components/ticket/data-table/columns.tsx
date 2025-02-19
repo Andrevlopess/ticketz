@@ -3,49 +3,54 @@
 import AvatarTooltip, { UsersAvatars } from "@/components/ui/avatar-tooltip";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { TicketWithDetails } from "@/types/ticket";
+import { TicketPreviewDetails } from "@/types/ticket";
 import { ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
 import { priorities, statuses } from "./data";
 import { DataTableColumnHeader } from "./data-table-column-header";
 import { DataTableRowActions } from "./data-table-row-actions";
 
-export const ticketsColumns: ColumnDef<TicketWithDetails>[] = [
+export const ticketsColumns: ColumnDef<TicketPreviewDetails>[] = [
   {
     id: "select",
     header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-        className="translate-y-[2px]"
-      />
+      <div className="w-[50px]">
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && "indeterminate")
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+          className="translate-y-[2px]"
+        />
+      </div>
     ),
     cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-        className="translate-y-[2px]"
-      />
+      <div className="w-[50px]">
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+          className="translate-y-[2px]"
+        />
+      </div>
     ),
     enableSorting: false,
     enableHiding: false,
   },
-  // {
-  //   accessorKey: "id",
-  //   header: ({ column }) => (
-  //     <DataTableColumnHeader column={column} title="Ticket" />
-  //   ),
-  //   cell: ({ row }) => (
-  //     <div className="w-[60px]">{"#" + row.getValue("id")}</div>
-  //   ),
-  //   enableSorting: false,
-  //   enableHiding: false,
-  // },
+  {
+    accessorKey: "id",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Ticket" />
+    ),
+    cell: ({ row }) => (
+      <div className="w-[60px]">{"#" + row.getValue("id")}</div>
+    ),
+    enableSorting: false,
+    enableHiding: false,
+  
+  },
   {
     accessorKey: "subject",
     header: ({ column }) => (

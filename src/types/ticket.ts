@@ -2,8 +2,7 @@ import type { User } from "@prisma/client";
 import { PublicUser } from "./users";
 
 
-
-export type TicketWithDetails = {
+export type TicketPreviewDetails = {
   id: number;
   subject: string;
   content: string | null;
@@ -24,6 +23,17 @@ export type TicketWithDetails = {
     name: string;
     id: number;
   } | null;
+  Tags: {
+    name: string;
+    id: number;
+  }[] | null;
   Solvers: PublicUser[] | null;
   createdAt: Date;
 };
+
+
+export interface TicketDetails extends TicketPreviewDetails  {
+  updatedAt: Date;
+  // deletedAt: Date | null;
+  // deletedBy: User | null;
+}

@@ -18,9 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Loader2, X } from "lucide-react";
 import { startTransition, useActionState, useEffect, useRef } from "react";
 import { Textarea } from "../../ui/textarea";
-import { newTaskAction } from "./actions/new-task-action";
 import { formSchema } from "./schema";
-// import { Select } from "react-day-picker";
 import {
   Select,
   SelectContent,
@@ -29,6 +27,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { newTaskAction } from "@/actions/ticket";
 
 export function NewTicketForm() {
   const { toast } = useToast();
@@ -46,7 +45,7 @@ export function NewTicketForm() {
       tags: ["Documentation"],
       group: "1",
       solver: "10",
-      ...(formState?.fields ?? {}),
+      // ...(formState?.fields ?? {}),
     },
   });
 
@@ -180,9 +179,7 @@ export function NewTicketForm() {
         )}
 
         <Button disabled={isPending} type="submit" className="">
-          {
-            isPending ? <Loader2 className="animate-spin"/> : "Create ticket"
-          }
+          {isPending ? <Loader2 className="animate-spin" /> : "Create ticket"}
         </Button>
       </form>
     </Form>
