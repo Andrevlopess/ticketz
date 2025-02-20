@@ -25,6 +25,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { NavHeaderMain } from "./nav-header";
+import { NavUser } from "./nav-user";
 
 const navHeader = [
   {
@@ -135,7 +136,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </a>
           </SidebarMenuButton>
         </SidebarMenu>
-        {/* <NavUser user={data.user} /> */}
+        <NavUser user={data.user} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

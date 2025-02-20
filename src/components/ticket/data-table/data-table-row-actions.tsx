@@ -23,7 +23,9 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import DeleteTicketButton from "./delete-ticket-button";
+import { useToast } from "@/hooks/use-toast";
+import { TicketPreviewDetailsSchema } from "@/schemas/ticket";
+import { useState } from "react";
 import DeleteTicketForm from "./delete-ticket-button";
 
 interface DataTableRowActionsProps<TData> {
@@ -33,12 +35,19 @@ interface DataTableRowActionsProps<TData> {
 export function DataTableRowActions<TData>({
   row,
 }: DataTableRowActionsProps<TData>) {
-  //   const task = taskSchema.parse(row.original)
+  console.log(row.original);
 
-  console.log(row.getValue('id'), row.original);
-  
+  const task = TicketPreviewDetailsSchema.parse(row.original);
+
+  const [open, setOpen] = useState(false);
+
+  const handleCloseModal = () => {
+    setOpen(false);
+    row.toggleSelected()
+  };
+
   return (
-    <AlertDialog>
+    <AlertDialog open={open} onOpenChange={setOpen}>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
@@ -79,7 +88,10 @@ export function DataTableRowActions<TData>({
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction asChild>
-            <DeleteTicketForm ticketId={19} />
+            <DeleteTicketForm
+              ticketId={task.id}
+              closeModal={handleCloseModal}
+            />
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

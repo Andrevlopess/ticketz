@@ -8,6 +8,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { PublicUser } from "@/types/users";
+import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 
@@ -30,9 +31,12 @@ export default function AvatarTooltip({ user, ...props }: AvatarTooltipProps) {
         </Avatar>
       </TooltipTrigger>
       <TooltipContent>
-        <p className="font-semibold">{`${user.first_name} ${user.last_name}`}</p>
+        <div className="flex justify-between">
+          <p className="font-semibold text-primary-foreground">{`${user.first_name} ${user.last_name}`}</p>
+          <ArrowUpRight className="text-primary-foreground translate-x-1" size={16} />
+        </div>
         {/* todo: set the user group here */}
-        <p className="text-muted-foreground">{`${user.email}`}</p>
+        <p className="text-primary-foreground">{`${user.email}`}</p>
       </TooltipContent>
     </Tooltip>
   );

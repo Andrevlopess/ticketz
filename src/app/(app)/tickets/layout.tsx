@@ -38,7 +38,7 @@ export default async function Page({
           {children}
         </div>
       </SidebarInset>
-      <SidebarRight />
+      {/* <SidebarRight /> */}
     </>
   );
 }

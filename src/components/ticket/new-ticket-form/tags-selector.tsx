@@ -17,7 +17,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { prisma } from "@/lib/prisma";
-import { fetchTags } from "./actions/tags";
 
 type Status = {
   value: string;

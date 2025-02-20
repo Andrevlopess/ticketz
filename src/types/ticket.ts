@@ -1,38 +1,11 @@
 import type { User } from "@prisma/client";
 import { PublicUser } from "./users";
+import { z } from "zod";
+import { TicketPreviewDetailsSchema } from "@/schemas/ticket";
 
+export type TicketPreviewDetails = z.infer<typeof TicketPreviewDetailsSchema>;
 
-export type TicketPreviewDetails = {
-  id: number;
-  subject: string;
-  content: string | null;
-  Creator: PublicUser
-  Company: {
-    name: string;
-    id: number;
-  } | null;
-  Priority: {
-    name: string;
-    id: number;
-  } | null;
-  Group: {
-    name: string;
-    id: number;
-  } | null;
-  Status: {
-    name: string;
-    id: number;
-  } | null;
-  Tags: {
-    name: string;
-    id: number;
-  }[] | null;
-  Solvers: PublicUser[] | null;
-  createdAt: Date;
-};
-
-
-export interface TicketDetails extends TicketPreviewDetails  {
+export interface TicketDetails extends TicketPreviewDetails {
   updatedAt: Date;
   // deletedAt: Date | null;
   // deletedBy: User | null;

@@ -1,7 +1,7 @@
 "use client";
 
+import { BadgeList } from "@/components/badges-list";
 import AvatarTooltip, { UsersAvatars } from "@/components/ui/avatar-tooltip";
-import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { TicketPreviewDetails } from "@/types/ticket";
 import { ColumnDef } from "@tanstack/react-table";
@@ -39,18 +39,18 @@ export const ticketsColumns: ColumnDef<TicketPreviewDetails>[] = [
     enableSorting: false,
     enableHiding: false,
   },
-  {
-    accessorKey: "id",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Ticket" />
-    ),
-    cell: ({ row }) => (
-      <div className="w-[60px]">{"#" + row.getValue("id")}</div>
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  
-  },
+  // {
+  //   accessorKey: "id",
+  //   header: ({ column }) => (
+  //     <DataTableColumnHeader column={column} title="Ticket" />
+  //   ),
+  //   cell: ({ row }) => (
+  //     <div className="w-[60px]">{"#" + row.getValue("id")}</div>
+  //   ),
+  //   enableSorting: false,
+  //   enableHiding: false,
+
+  // },
   {
     accessorKey: "subject",
     header: ({ column }) => (
@@ -59,24 +59,30 @@ export const ticketsColumns: ColumnDef<TicketPreviewDetails>[] = [
     cell: ({ row }) => {
       const creator = row.original.Creator;
 
-      const fallbackLetters = creator.first_name[0] + creator.last_name[0];
-
       return (
-        <div className="flex space-x-2">
+        <div className="flex space-x-4">
           <Link href={`users/${creator.id}`}>
             <AvatarTooltip user={creator} />
           </Link>
-          <Link href={`/tickets/${row.original.id}`}>
-            <div className="flex flex-col items-start group">
-              <div className="flex space-x-2">
-                <p className="text-muted-foreground group-hover:text-secondary-foreground">{`#${row.original.id}`}</p>
-                <Badge variant="outline">Subject</Badge>
-              </div>
-              <span className="max-w-[500px] truncate font-medium group-hover:underline">
-                {row.getValue("subject")}
-              </span>
+
+          <div className="flex flex-col items-start group space-y-1">
+            <div className="flex space-x-2">
+              <p className="text-muted-foreground group-hover:text-secondary-foreground">{`#${row.original.id}`}</p>
+              <BadgeList
+                items={row.original.Tags}
+                variant="outline"
+                maxBadges={3}
+              />
             </div>
-          </Link>
+            <Link
+              href={`/tickets/${row.original.id}`}
+              className="max-w-3xl truncate font-medium group-hover:underline"
+            >
+              {/* <span> */}
+              {row.getValue("subject")}
+              {/* </span> */}
+            </Link>
+          </div>
         </div>
       );
     },

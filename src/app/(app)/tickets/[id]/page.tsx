@@ -1,3 +1,4 @@
+import TicketCreatorCard from "@/components/ticket/ticket-creator-card";
 import TicketView from "@/components/ticket/ticket-view";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
@@ -76,16 +77,21 @@ export default async function Page({ params }: { params: Promise<Params> }) {
       updatedAt: true,
     },
   });
-  // .catch((error) => console.log(error));
 
   if (!ticket) {
     return notFound();
   }
-  console.log(ticket);
 
   return (
-    <div className="mx-auto max-w-5xl w-full">
-      <TicketView ticket={ticket} />
+
+    
+    <div className="grid grid-cols-3 max-w-7xl mx-auto w-full gap-12">
+      <div className=" col-span-2">
+        <TicketView ticket={ticket} />
+      </div>
+      <div>
+        <TicketCreatorCard creator={ticket.Creator} />
+      </div>
     </div>
   );
 }

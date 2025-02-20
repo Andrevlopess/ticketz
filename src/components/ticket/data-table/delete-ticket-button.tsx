@@ -1,19 +1,38 @@
-import React, { useActionState } from "react";
-import { Button } from "@/components/ui/button";
 import { deleteTicket } from "@/actions/ticket";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 import { FormState } from "@/types/form-state";
 import { Loader2 } from "lucide-react";
+import { useActionState, useEffect } from "react";
 
 const initialState: FormState = {
   success: false,
 };
 
-export default function DeleteTicketForm({ ticketId }: { ticketId: number }) {
+export default function DeleteTicketForm({
+  ticketId,
+  closeModal,
+}: {
+  ticketId: number;
+  closeModal: () => void;
+}) {
   const [formState, formAction, isPending] = useActionState(
     deleteTicket,
     initialState
   );
-  console.log(ticketId);
+
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (formState.success) {
+      closeModal();
+      toast({
+        title: "Ticket deleted",
+        description: "Ticket was deleted successfully",
+        variant: "destructive",
+      });
+    }
+  }, [formState]);
 
   return (
     <form action={formAction}>
@@ -28,7 +47,3 @@ export default function DeleteTicketForm({ ticketId }: { ticketId: number }) {
     </form>
   );
 }
-
-// hook.js:608
-//  async/await is not yet supported in Client Components, only Server Components. This error is often caused by accidentally adding `'use client'` to a module that was originally written for the server. Error Component Stack
-//     at DeleteTicketButton (<anonymous>)

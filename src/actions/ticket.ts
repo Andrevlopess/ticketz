@@ -41,7 +41,6 @@ export async function newTaskAction(
 
   await prisma.ticket.create({
     data: {
-      // subject: formData.get("subject") as string,
       subject: parsed.data.subject,
       content: parsed.data.content,
       priorityId: 1,
@@ -61,7 +60,7 @@ export async function newTaskAction(
 }
 
 export async function deleteTicket(
-  prevState: any,
+  prevState: FormState,
   payload: FormData
 ): Promise<FormState> {
   const schema = z.object({
