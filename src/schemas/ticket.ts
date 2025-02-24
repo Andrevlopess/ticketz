@@ -1,7 +1,39 @@
 import { z } from "zod";
-import { UserSchema } from "./user";
+import { PublicUserSchema } from "./user";
+import { group } from "console";
 
-const NewTicketFormSchema = z.object({
+const StatusSchema = z.object({
+  name: z.string(),
+  id: z.number(),
+});
+export type Status = z.infer<typeof StatusSchema>;
+
+const GroupSchema = z.object({
+  name: z.string(),
+  id: z.number(),
+});
+// .nullable();
+export type Group = z.infer<typeof GroupSchema>;
+
+const TagSchema = z.object({
+  name: z.string(),
+  id: z.number(),
+});
+export type Tag = z.infer<typeof TagSchema>;
+
+const PrioritySchema = z.object({
+  name: z.string(),
+  id: z.number(),
+});
+export type Priority = z.infer<typeof PrioritySchema>;
+
+const CompanySchema = z.object({
+  name: z.string(),
+  id: z.number(),
+});
+export type Company = z.infer<typeof CompanySchema>;
+
+export const NewTicketFormSchema = z.object({
   subject: z.string().trim().min(2, {
     message: "Subject must be at least 2 characters.",
   }),
@@ -14,43 +46,29 @@ const NewTicketFormSchema = z.object({
   solver: z.string().optional(),
 });
 
-const TicketPreviewDetailsSchema = z.object({
+export type NewTicketForm = z.infer<typeof NewTicketFormSchema>;
+
+export const TicketPreviewDetailsSchema = z.object({
   id: z.number(),
   subject: z.string(),
   content: z.string().nullable(),
-  Creator: UserSchema,
-  Company: z
-    .object({
-      name: z.string(),
-      id: z.number(),
-    })
-    .nullable(),
-  Priority: z
-    .object({
-      name: z.string(),
-      id: z.number(),
-    })
-    .nullable(),
-  Group: z
-    .object({
-      name: z.string(),
-      id: z.number(),
-    })
-    .nullable(),
-  Status: z
-    .object({
-      name: z.string(),
-      id: z.number(),
-    })
-    .nullable(),
-  Tags: z.array(
-    z.object({
-      name: z.string(),
-      id: z.number(),
-    })
-  ),
-  Solvers: z.array(UserSchema),
+  Creator: PublicUserSchema,
+  Company: CompanySchema,
+  Priority: PrioritySchema,
+  Group: GroupSchema,
+  Status: StatusSchema,
+  Tags: z.array(TagSchema),
+  Solvers: z.array(PublicUserSchema),
   createdAt: z.date(),
 });
 
-export { TicketPreviewDetailsSchema, NewTicketFormSchema };
+export type TicketPreviewDetails = z.infer<typeof TicketPreviewDetailsSchema>;
+
+export const TicketPropertiesSchema = z.object({
+  // ticketId: z.number(),
+  statusId: z.string(),
+  priorityId: z.string(),
+  groupId: z.string(),
+});
+
+export type TicketProperties = z.infer<typeof TicketPropertiesSchema>;

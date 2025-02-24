@@ -138,10 +138,10 @@ export default async function Page() {
 
   const tickets = await getTickets();
 
+
   return (
     <>
       <TicketsDataTable data={tickets} columns={ticketsColumns} />
-      {/* <p>faz o eli</p> */}
     </>
   );
 }

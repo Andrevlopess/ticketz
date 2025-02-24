@@ -3,12 +3,12 @@
 import { BadgeList } from "@/components/badges-list";
 import AvatarTooltip, { UsersAvatars } from "@/components/ui/avatar-tooltip";
 import { Checkbox } from "@/components/ui/checkbox";
-import { TicketPreviewDetails } from "@/types/ticket";
 import { ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
 import { priorities, statuses } from "./data";
 import { DataTableColumnHeader } from "./data-table-column-header";
 import { DataTableRowActions } from "./data-table-row-actions";
+import { TicketPreviewDetails } from "@/schemas/ticket";
 
 export const ticketsColumns: ColumnDef<TicketPreviewDetails>[] = [
   {
@@ -39,18 +39,24 @@ export const ticketsColumns: ColumnDef<TicketPreviewDetails>[] = [
     enableSorting: false,
     enableHiding: false,
   },
-  // {
-  //   accessorKey: "id",
-  //   header: ({ column }) => (
-  //     <DataTableColumnHeader column={column} title="Ticket" />
-  //   ),
-  //   cell: ({ row }) => (
-  //     <div className="w-[60px]">{"#" + row.getValue("id")}</div>
-  //   ),
-  //   enableSorting: false,
-  //   enableHiding: false,
-
-  // },
+  {
+    accessorKey: "id",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Ticket" />
+    ),
+    cell: ({ row }) => (
+      <div className="w-[60px] group">
+      <Link
+          href={`/tickets/${row.original.id}`}
+          className="max-w-3xl truncate font-medium group-hover:underline"
+        >
+          {"#" + row.getValue("id")}
+        </Link>
+      </div>
+    ),
+    enableSorting: false,
+    enableHiding: false,
+  },
   {
     accessorKey: "subject",
     header: ({ column }) => (
@@ -65,23 +71,18 @@ export const ticketsColumns: ColumnDef<TicketPreviewDetails>[] = [
             <AvatarTooltip user={creator} />
           </Link>
 
-          <div className="flex flex-col items-start group space-y-1">
+          <div className="flex flex-col items-start space-y-1">
             <div className="flex space-x-2">
-              <p className="text-muted-foreground group-hover:text-secondary-foreground">{`#${row.original.id}`}</p>
+              {/* <p className="text-muted-foreground group-hover:text-secondary-foreground">{`#${row.original.id}`}</p> */}
               <BadgeList
                 items={row.original.Tags}
                 variant="outline"
                 maxBadges={3}
               />
             </div>
-            <Link
-              href={`/tickets/${row.original.id}`}
-              className="max-w-3xl truncate font-medium group-hover:underline"
-            >
-              {/* <span> */}
+            <span className="max-w-3xl truncate font-medium">
               {row.getValue("subject")}
-              {/* </span> */}
-            </Link>
+            </span>
           </div>
         </div>
       );
@@ -172,7 +173,7 @@ export const ticketsColumns: ColumnDef<TicketPreviewDetails>[] = [
     cell: ({ row }) => {
       return (
         <div className="">
-          {row.original.createdAt.toLocaleDateString("pt-br")}
+          {new Date(row.original.createdAt).toLocaleDateString("pt-br")}
         </div>
       );
     },

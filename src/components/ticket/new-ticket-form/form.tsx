@@ -18,7 +18,6 @@ import { Input } from "@/components/ui/input";
 import { Loader2, X } from "lucide-react";
 import { startTransition, useActionState, useEffect, useRef } from "react";
 import { Textarea } from "../../ui/textarea";
-import { formSchema } from "./schema";
 import {
   Select,
   SelectContent,
@@ -28,6 +27,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { newTaskAction } from "@/actions/ticket";
+import { NewTicketFormSchema } from "@/schemas/ticket";
 
 export function NewTicketForm() {
   const { toast } = useToast();
@@ -36,8 +36,8 @@ export function NewTicketForm() {
     success: false,
   });
 
-  const form = useForm<z.output<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.output<typeof NewTicketFormSchema>>({
+    resolver: zodResolver(NewTicketFormSchema),
     defaultValues: {
       subject: "",
       content: "",

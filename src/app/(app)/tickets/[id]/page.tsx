@@ -10,8 +10,6 @@ interface Params {
 export default async function Page({ params }: { params: Promise<Params> }) {
   const id = (await params).id;
 
-  console.log(parseInt(id));
-
   if (!parseInt(id)) {
     return notFound();
   }
@@ -82,14 +80,13 @@ export default async function Page({ params }: { params: Promise<Params> }) {
     return notFound();
   }
 
-  return (
 
-    
-    <div className="grid grid-cols-3 max-w-7xl mx-auto w-full gap-12">
-      <div className=" col-span-2">
+  return (
+    <div className="flex container mx-auto w-full gap-4">
+      <div className="">
         <TicketView ticket={ticket} />
       </div>
-      <div>
+      <div className="max-w-sm">
         <TicketCreatorCard creator={ticket.Creator} />
       </div>
     </div>

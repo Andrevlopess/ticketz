@@ -32,7 +32,7 @@ const Separator = React.forwardRef<
     const separatorVariants = cva("shrink-0 bg-border", {
       variants: {
         variant: {
-          dot: "rounded-full h-2 w-2",
+          dot: "rounded-full h-2 w-2 my-auto",
           line:
             orientation === "horizontal" ? "h-[1px] w-full" : "h-full w-[1px]",
         },

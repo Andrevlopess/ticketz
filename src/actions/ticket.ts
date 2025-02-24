@@ -1,8 +1,11 @@
 "use server";
-import { formSchema } from "@/components/ticket/new-ticket-form/schema";
 import { prisma } from "@/lib/prisma";
+import {
+  NewTicketFormSchema,
+  TicketProperties,
+  TicketPropertiesSchema,
+} from "@/schemas/ticket";
 import { FormState } from "@/types/form-state";
-import { error } from "console";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import "server-only";
@@ -20,7 +23,7 @@ export async function newTaskAction(
   }
 
   const formData = Object.fromEntries(payload);
-  const parsed = formSchema.safeParse(formData);
+  const parsed = NewTicketFormSchema.safeParse(formData);
 
   if (!parsed.success) {
     const errors = parsed.error.flatten().fieldErrors;
@@ -28,7 +31,7 @@ export async function newTaskAction(
     const fields: Record<string, string> = {};
 
     for (const key of Object.keys(formData)) {
-      fields[key] = formData[key].toString();
+      fields[key] = formData[key]?.toString();
     }
 
     return {
@@ -37,7 +40,6 @@ export async function newTaskAction(
       errors,
     };
   }
-  console.log(parsed);
 
   await prisma.ticket.create({
     data: {
@@ -110,6 +112,66 @@ export async function deleteTicket(
       success: false,
       errors: {
         error: [String(e)],
+      },
+    };
+  }
+}
+
+export async function updateTicketProperties(
+  ticketId: number,
+  prevState: FormState,
+  payload: FormData
+): Promise<FormState> {
+  try {
+    if (!(payload instanceof FormData)) {
+      return {
+        success: false,
+        errors: { error: ["Invalid Form Data"] },
+      };
+    }
+
+    const formData = Object.fromEntries(payload);
+    const parsed = TicketPropertiesSchema.safeParse(formData);
+
+    if (!parsed.success) {
+      const errors = parsed.error.flatten().fieldErrors;
+
+      const fields: Record<string, string> = {};
+      Object.keys(formData).forEach(
+        (key) => (fields[key] = formData[key]?.toString())
+      );
+
+      return {
+        success: false,
+        fields,
+        errors,
+      };
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    // await prisma.ticket.update({
+    //   where: {
+    //     id: ticketId,
+    //   },
+    //   data: {
+    //     statusId: parsed.data.statusId,
+    //     priorityId: parsed.data.priorityId,
+    //   },
+    // });
+
+    console.log("PRISMA UPDATED");
+
+    revalidatePath(`tickets/${ticketId}`);
+
+    return {
+      success: true,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      errors: {
+        error: [String(error)],
       },
     };
   }
