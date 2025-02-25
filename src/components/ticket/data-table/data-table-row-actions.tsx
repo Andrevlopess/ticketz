@@ -24,7 +24,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
-import { TicketPreviewDetailsSchema } from "@/schemas/ticket";
+import { TicketPreviewDetails, TicketPreviewDetailsSchema } from "@/schemas/ticket";
 import { useState } from "react";
 import DeleteTicketForm from "./delete-ticket-button";
 
@@ -37,7 +37,7 @@ export function DataTableRowActions<TData>({
 }: DataTableRowActionsProps<TData>) {
   console.log(row.original);
 
-  const task = TicketPreviewDetailsSchema.parse(row.original);
+  const task = TicketPreviewDetailsSchema.parse(row.original as TicketPreviewDetails);
 
   const [open, setOpen] = useState(false);
 

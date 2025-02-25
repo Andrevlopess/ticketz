@@ -148,19 +148,15 @@ export async function updateTicketProperties(
       };
     }
 
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
-    // await prisma.ticket.update({
-    //   where: {
-    //     id: ticketId,
-    //   },
-    //   data: {
-    //     statusId: parsed.data.statusId,
-    //     priorityId: parsed.data.priorityId,
-    //   },
-    // });
-
-    console.log("PRISMA UPDATED");
+    await prisma.ticket.update({
+      where: {
+        id: ticketId,
+      },
+      data: {
+        statusId: +parsed.data.statusId,
+        priorityId: +parsed.data.priorityId,
+      },
+    });
 
     revalidatePath(`tickets/${ticketId}`);
 

@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { TicketPreviewDetails } from "@/schemas/ticket";
 import TicketStatusForm from "./ticket-options-form";
-import { statuses, priorities } from "./data-table/data";
+import { Skeleton } from "../ui/skeleton";
 
 interface TicketOptionsMenuProps {
   ticket: TicketPreviewDetails;
@@ -10,7 +10,6 @@ interface TicketOptionsMenuProps {
 export default async function TicketViewOptionsMenu({
   ticket,
 }: TicketOptionsMenuProps) {
-
   const [statuses, priorities, groups] = await prisma.$transaction((prisma) => {
     return Promise.all([
       prisma.status.findMany({
@@ -39,10 +38,6 @@ export default async function TicketViewOptionsMenu({
     ]);
   });
 
-  console.log('fetched data');
-  
-
-
   return (
     <div className="space-y-4">
       <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
@@ -56,5 +51,19 @@ export default async function TicketViewOptionsMenu({
         statuses={statuses}
       />
     </div>
+  );
+}
+
+export function TicketViewOptionsMenuSkeleton() {
+  return (
+      <div className="space-y-6">
+        {new Array(5).fill(null).map((_, i) => (
+          <>
+            <Skeleton className="h-4 w-1/4" />
+            <Skeleton className="h-8 w-64" />
+          </>
+        ))}
+      <Skeleton className="w-64 h-10" />
+      </div>
   );
 }

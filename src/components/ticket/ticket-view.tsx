@@ -1,8 +1,11 @@
 import { TicketPreviewDetails } from "@/schemas/ticket";
+import { Suspense } from "react";
 import { BadgeList } from "../badges-list";
 import { Separator } from "../ui/separator";
+import TicketViewOptionsMenu, {
+  TicketViewOptionsMenuSkeleton,
+} from "./ticket-options-menu";
 import TicketViewHeader from "./ticket-view-header";
-import TicketViewOptionsMenu from "./ticket-options-menu";
 
 interface Props {
   ticket: TicketPreviewDetails;
@@ -24,8 +27,12 @@ export default function TicketView({ ticket }: Props) {
             </p>
             <Separator variant="dot" className="bg-muted-foreground" />
             <p className="leading-7 text-muted-foreground">
-              {ticket.createdAt.toLocaleDateString("pt-br", {
+              {ticket.createdAt.toLocaleString("pt-br", {
                 dateStyle: "long",
+              })}
+              {", "} 
+              {ticket.createdAt.toLocaleTimeString("pt-br", {
+                timeStyle: "short",
               })}
             </p>
           </div>
@@ -39,7 +46,10 @@ export default function TicketView({ ticket }: Props) {
           <p className="leading-7">{ticket.content}</p>
         </div>
       </div>
-      <TicketViewOptionsMenu ticket={ticket} />
+
+      <Suspense fallback={<TicketViewOptionsMenuSkeleton />}>
+        <TicketViewOptionsMenu ticket={ticket} />
+      </Suspense>
     </div>
   );
 }

@@ -22,8 +22,9 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage
+  FormMessage,
 } from "../ui/form";
+import MultipleSelect from "../ui/multiple-select";
 import {
   Select,
   SelectContent,
@@ -71,8 +72,6 @@ export default function TicketStatusForm(props: TicketPropertiesFormProps) {
 
   useEffect(() => {
     if (formState.success) {
-      console.log('FAZ O ELE E NAO GRITA');
-      
       toast({
         title: "Ticket updated successfully!",
         description: "Your ticket has been updated successfully.",
@@ -81,7 +80,14 @@ export default function TicketStatusForm(props: TicketPropertiesFormProps) {
     }
   }, [formState.success]);
 
-  console.log(formState.success);
+  console.log(
+    "ta sujo:",
+    form.formState.isDirty,
+    props.ticket.Status.id.toString(),
+    form.getValues("statusId"),
+    typeof props.ticket.Status.id.toString(),
+    typeof form.getValues("statusId")
+  );
 
   return (
     <Form {...form}>
@@ -169,6 +175,47 @@ export default function TicketStatusForm(props: TicketPropertiesFormProps) {
             );
           }}
         />
+
+        <FormField
+          control={form.control}
+          name="companyId"
+          render={({ field }) => {
+            return (
+              <FormItem>
+                <FormLabel>Company</FormLabel>
+                <FormControl>
+                  <Select
+                    onValueChange={field.onChange}
+                    // defaultValue={field.value.toString()}
+                    name="companyId"
+                  >
+                    <SelectTrigger className="w-64">
+                      <SelectValue placeholder="Select an group" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {/* <SelectLabel>Status</SelectLabel>; */}
+                        {props.groups.map((priority) => (
+                          <SelectItem
+                            value={priority?.id.toString()}
+                            key={priority?.id.toString()}
+                          >
+                            <div className="flex items-center">
+                              {/* <Circle className="size-4 shrink-0 mr-2" /> */}
+                              {priority?.name}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            );
+          }}
+        />
+
         <FormField
           control={form.control}
           name="groupId"
@@ -179,7 +226,7 @@ export default function TicketStatusForm(props: TicketPropertiesFormProps) {
                 <FormControl>
                   <Select
                     onValueChange={field.onChange}
-                    defaultValue={field.value.toString()}
+                    // defaultValue={field.value.toString()}
                     name="groupId"
                   >
                     <SelectTrigger className="w-64">
@@ -209,16 +256,76 @@ export default function TicketStatusForm(props: TicketPropertiesFormProps) {
           }}
         />
 
+        <FormField
+          control={form.control}
+          name="tags"
+          render={({ field }) => {
+            return (
+              <FormItem>
+                <FormLabel>Group</FormLabel>
+                <FormControl>
+                  <Select
+                    onValueChange={field.onChange}
+                    // defaultValue={field.value.toString()}
+                    name="groupId"
+                  >
+                    <SelectTrigger className="w-64">
+                      <SelectValue placeholder="Select an group" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {/* <SelectLabel>Status</SelectLabel>; */}
+                        {props.groups.map((priority) => (
+                          <SelectItem
+                            value={priority?.id.toString()}
+                            key={priority?.id.toString()}
+                          >
+                            <div className="flex items-center">
+                              {/* <Circle className="size-4 shrink-0 mr-2" /> */}
+                              {priority?.name}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            );
+          }}
+        />
+        <FormField
+          control={form.control}
+          name="solvers"
+          render={({ field }) => {
+            return (
+              <FormItem>
+                <FormLabel>Group</FormLabel>
+                <FormControl>
+                  <MultipleSelect
+                    options={[
+                      {
+                        label: "teste",
+                        value: "teste",
+                      },
+                      {
+                        label: "test",
+                        value: "test",
+                      },
+                    ]}
+                    title="faz o ele"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            );
+          }}
+        />
+
         <Button
           disabled={isPending || !form.formState.isDirty}
-          type="button"
-          onClick={() => {
-            toast({
-              title: "Ticket updated successfully!",
-              description: "Your ticket has been updated successfully.",
-              // status: "success",
-            });
-          }}
+          type="submit"
           className="mt-4 w-full"
           variant="secondary"
         >

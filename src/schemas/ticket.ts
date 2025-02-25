@@ -59,7 +59,7 @@ export const TicketPreviewDetailsSchema = z.object({
   Status: StatusSchema,
   Tags: z.array(TagSchema),
   Solvers: z.array(PublicUserSchema),
-  createdAt: z.date(),
+  createdAt: z.coerce.date()
 });
 
 export type TicketPreviewDetails = z.infer<typeof TicketPreviewDetailsSchema>;
@@ -69,6 +69,11 @@ export const TicketPropertiesSchema = z.object({
   statusId: z.string(),
   priorityId: z.string(),
   groupId: z.string(),
+  solverId: z.string(),
+  companyId: z.string(),
+  solvers: z.array(z.string()).optional(),
+  tags: z.array(z.string()).optional(),
+  
 });
 
 export type TicketProperties = z.infer<typeof TicketPropertiesSchema>;
