@@ -71,8 +71,8 @@ export const TicketPropertiesSchema = z.object({
   groupId: z.string(),
   solverId: z.string(),
   companyId: z.string(),
-  solvers: z.array(z.string()).optional(),
-  tags: z.array(z.string()).optional(),
+  solvers: z.array(PublicUserSchema),
+  tags: z.array(TagSchema),
   
 });
 

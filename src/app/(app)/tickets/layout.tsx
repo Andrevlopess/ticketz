@@ -21,7 +21,7 @@ export default async function Page({
   return (
     <>
       <SidebarInset>
-        <header className="sticky top-0 flex h-14 shrink-0 items-center gap-2 bg-background">
+        <header className="sticky z-50 top-0 flex h-14 shrink-0 items-center gap-2 bg-background border-b">
           <div className="flex flex-1 items-center gap-2 px-3">
             <SidebarTrigger />
             <Separator orientation="vertical" className="mr-2 h-4" />
@@ -34,7 +34,7 @@ export default async function Page({
             </Button>
           </div>
         </header>
-        <div className="flex flex-1 flex-col gap-4 p-4 border-t ">
+        <div className="flex flex-1 flex-col gap-4 p-4 ">
           {children}
         </div>
       </SidebarInset>

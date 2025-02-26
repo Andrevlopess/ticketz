@@ -1,94 +1,113 @@
-import { cn } from "@/lib/utils";
+
 import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from "@radix-ui/react-popover";
-import { Separator } from "@radix-ui/react-separator";
-import {
-  CommandInput,
-  CommandList,
+  Command,
   CommandEmpty,
   CommandGroup,
+  CommandInput,
   CommandItem,
+  CommandList,
   CommandSeparator,
-} from "cmdk";
-import { PlusCircle, Check } from "lucide-react";
-import { Button } from "./button";
+} from "@/components/ui/command";
+import { cn } from "@/lib/utils";
+import { Check, ChevronDown, CirclePlus } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Option } from "react-day-picker";
 import { Badge } from "./badge";
-import { Command } from "./command";
+import { Button } from "./button";
+import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 
-interface MultipleSelect {
-  title?: string;
-  options: {
-    label: string;
-    value: string;
-    icon?: React.ComponentType<{ className?: string }>;
-  }[];
+interface Option {
+  label: string;
+  value: string;
+}
+interface MultipleSelectProps {
+  title?: string
+  maxVisibleOptions?: number
+  options: Option[];
+  selectedOptions: Option[];
+  onChange: (data: Option[]) => void
 }
 
-export default function MultipleSelect({ options, title }: MultipleSelect) {
-  const selectedValues = new Set([] as string[]);
+export default function MultipleSelect({ options, selectedOptions, title, maxVisibleOptions = 2, onChange }: MultipleSelectProps) {
+
+
+  const [selectedValues, setSelectedValues] = useState<Option[]>(selectedOptions)
+
+
+  useEffect(() => {
+    onChange(selectedValues)
+  }, [selectedValues])
+
 
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline">
-          <PlusCircle />
-          {/* {title} */}
-          {selectedValues?.size > 0 && (
+        <Button variant="outline" className="flex px-3 py-2 justify-start w-64 h-full">
+          {selectedValues?.length > 0 ? (
             <>
-              <Separator orientation="vertical" className="mx-2 h-4" />
+              {/* <Separator orientation="vertical" className="mx-2 h-4" /> */}
               <Badge
                 variant="secondary"
-                className="rounded-sm px-1 font-normal lg:hidden"
+                className="rounded-sm px-1 font-normal md:hidden"
               >
-                {selectedValues.size}
+                {selectedValues.length} {title ?? 'options'} selected
               </Badge>
-              <div className="hidden space-x-1 lg:flex">
-                {selectedValues.size > 2 ? (
-                  <Badge
-                    variant="secondary"
-                    className="rounded-sm px-1 font-normal"
-                  >
-                    {selectedValues.size} selected
-                  </Badge>
-                ) : (
-                  options
-                    .filter((option) => selectedValues.has(option.value))
-                    .map((option) => (
-                      <Badge
-                        variant="secondary"
-                        key={option.value}
-                        className="rounded-sm px-1 font-normal"
-                      >
-                        {option.label}
-                      </Badge>
-                    ))
-                )}
+
+              <div className="hidden gap-2 md:flex flex-wrap w-full">
+
+                {selectedValues
+                  .slice(0, maxVisibleOptions)
+                  .map((option) => (
+                    <Badge
+                      variant="secondary"
+                      key={option.value}
+                      className="rounded-sm font-normal truncate"
+                    >
+                      {option.label}
+                    </Badge>
+                  ))}
+                {
+                  selectedValues.length > maxVisibleOptions && (
+                    <Badge
+                      variant="secondary"
+                      className="rounded-sm font-normal"
+                    >
+                      +{selectedValues.length - maxVisibleOptions}
+                    </Badge>
+                  )}
               </div>
             </>
+          ) : (
+
+            <div className="flex justify-between w-full items-center">
+              <span>Select {title ?? 'option'}</span>
+              <CirclePlus className="h-4 w-4 opacity-50" />
+            </div>
+
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0" align="start">
+      <PopoverContent className="max-w-64 p-0" align="start">
         <Command>
-          <CommandInput placeholder={"teste"} />
+          <CommandInput placeholder={`Search for ${title ?? 'option'}`} />
           <CommandList>
             <CommandEmpty>No results found.</CommandEmpty>
             <CommandGroup>
               {options.map((option) => {
-                const isSelected = selectedValues.has(option.value);
+
+                const isSelected = selectedValues.some(item => item.value === option.value);
+
+
                 return (
                   <CommandItem
                     key={option.value}
                     onSelect={() => {
+
                       if (isSelected) {
-                        selectedValues.delete(option.value);
+                        setSelectedValues(prev => prev.filter(item => item.value !== option.value))
                       } else {
-                        selectedValues.add(option.value);
+                        setSelectedValues(prev => [...prev, option])
                       }
-                      const filterValues = Array.from(selectedValues);
                     }}
                   >
                     <div
@@ -101,28 +120,22 @@ export default function MultipleSelect({ options, title }: MultipleSelect) {
                     >
                       <Check />
                     </div>
-                    {option.icon && (
-                      <option.icon className="mr-2 h-4 w-4 text-muted-foreground" />
-                    )}
-                    <span>{option.label}</span>
-                    {/* {facets?.get(option.value) && (
-                      <span className="ml-auto flex h-4 w-4 items-center justify-center font-mono text-xs">
-                        {facets.get(option.value)}
-                      </span>
-                    )} */}
+
+                    <span className="truncate">{option.label}</span>
+
                   </CommandItem>
-                );
+                )
               })}
             </CommandGroup>
-            {selectedValues.size > 0 && (
+            {selectedOptions.length > 0 && (
               <>
                 <CommandSeparator />
                 <CommandGroup>
                   <CommandItem
-                    //   onSelect={() => column?.setFilterValue(undefined)}
+                    onSelect={() => setSelectedValues([])}
                     className="justify-center text-center"
                   >
-                    Clear filters
+                    Clear {title ?? 'options'}
                   </CommandItem>
                 </CommandGroup>
               </>
@@ -130,6 +143,6 @@ export default function MultipleSelect({ options, title }: MultipleSelect) {
           </CommandList>
         </Command>
       </PopoverContent>
-    </Popover>
+    </Popover >
   );
 }

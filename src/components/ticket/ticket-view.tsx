@@ -46,7 +46,7 @@ export default function TicketView({ ticket }: Props) {
           <p className="leading-7">{ticket.content}</p>
         </div>
       </div>
-
+      {/* <TicketViewOptionsMenuSkeleton /> */}
       <Suspense fallback={<TicketViewOptionsMenuSkeleton />}>
         <TicketViewOptionsMenu ticket={ticket} />
       </Suspense>

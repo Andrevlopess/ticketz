@@ -80,7 +80,7 @@ export const ticketsColumns: ColumnDef<TicketPreviewDetails>[] = [
                 maxBadges={3}
               />
             </div>
-            <span className="max-w-3xl truncate font-medium">
+            <span className="truncate font-medium max-w-[400px]">
               {row.getValue("subject")}
             </span>
           </div>

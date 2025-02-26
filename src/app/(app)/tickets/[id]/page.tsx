@@ -163,9 +163,13 @@ export default async function Page({ params }: { params: Promise<Params> }) {
   return (
     <div className="flex container mx-auto w-full gap-4">
       <div className="">
-        <TicketView ticket={ticket} />
+        <Suspense fallback={<p>loading</p>}>
+
+          <TicketView ticket={ticket} />
+        </Suspense>
+
       </div>
-      <div className="max-w-sm">
+      <div className="md:hidden">
         <TicketCreatorCard creator={ticket.Creator} />
       </div>
     </div>

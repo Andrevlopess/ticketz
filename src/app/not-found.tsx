@@ -6,7 +6,7 @@ export default function NotFoundGlobalPage() {
     <main className="grid place-items-center bg-background px-6 py-24 sm:py-32 lg:px-8 min-h-screen items-center justify-center">
       <div className="text-center">
         <p className="text-base font-semibold text-accent-foreground">404</p>
-        <h1 className="mt-4 text-5xl font-semibold tracking-tight text-balance text-primary-foreground sm:text-7xl">
+        <h1 className="mt-4 text-5xl font-semibold tracking-tight text-balance text-foreground sm:text-7xl">
           Page not found
         </h1>
         <p className="mt-6 text-lg font-medium text-pretty text-muted-foreground sm:text-xl/8">
