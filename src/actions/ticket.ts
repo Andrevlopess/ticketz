@@ -120,33 +120,36 @@ export async function deleteTicket(
 export async function updateTicketProperties(
   ticketId: number,
   prevState: FormState,
-  payload: FormData
+  payload: TicketProperties
 ): Promise<FormState> {
   try {
-    if (!(payload instanceof FormData)) {
-      return {
-        success: false,
-        errors: { error: ["Invalid Form Data"] },
-      };
-    }
+    // if (!(payload instanceof FormData)) {
+    //   return {
+    //     success: false,
+    //     errors: { error: ["Invalid Form Data"] },
+    //   };
+    // }
 
-    const formData = Object.fromEntries(payload);
-    const parsed = TicketPropertiesSchema.safeParse(formData);
+    // const formData = Object.fromEntries(payload);
+    const parsed = TicketPropertiesSchema.safeParse(payload);
 
     if (!parsed.success) {
       const errors = parsed.error.flatten().fieldErrors;
 
-      const fields: Record<string, string> = {};
-      Object.keys(formData).forEach(
-        (key) => (fields[key] = formData[key]?.toString())
-      );
+      // const fields: Record<string, string> = {};
+      // Object.keys(formData).forEach(
+      //   (key) => (fields[key] = formData[key]?.toString())
+      // );
 
       return {
         success: false,
-        fields,
+        fields: {},
         errors,
       };
     }
+
+    console.log('PARSED', parsed);
+    
 
     await prisma.ticket.update({
       where: {
@@ -155,6 +158,15 @@ export async function updateTicketProperties(
       data: {
         statusId: +parsed.data.statusId,
         priorityId: +parsed.data.priorityId,
+        companyId: +parsed.data.companyId,
+        groupId: +parsed.data.groupId,
+        Tags: {
+          connectOrCreate: parsed.data.tags.map(tag => ({
+            where: {name: tag.name},
+            create: {name: tag.name}
+          }))
+        }
+        
       },
     });
 

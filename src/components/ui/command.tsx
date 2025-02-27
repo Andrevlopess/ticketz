@@ -3,7 +3,7 @@
 import * as React from "react"
 import { type DialogProps } from "@radix-ui/react-dialog"
 import { Command as CommandPrimitive } from "cmdk"
-import { Search } from "lucide-react"
+import { Loader, Loader2, Search } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
@@ -140,6 +140,25 @@ const CommandShortcut = ({
 }
 CommandShortcut.displayName = "CommandShortcut"
 
+
+const CommandLoading = React.forwardRef<
+  React.ElementRef<typeof CommandPrimitive.Loading>,
+  React.ComponentPropsWithoutRef<typeof CommandPrimitive.Loading>
+>(({ className, ...props }, ref) => (
+  <CommandPrimitive.Loading
+    ref={ref}
+    className={cn(
+      "flex min-w-full items-center justify-center py-6",
+      className
+    )}
+    {...props}
+  >
+    <Loader className="animate-spin" size={18}/>
+  </CommandPrimitive.Loading>
+))
+
+CommandLoading.displayName = CommandPrimitive.Loading.displayName
+
 export {
   Command,
   CommandDialog,
@@ -150,4 +169,5 @@ export {
   CommandItem,
   CommandShortcut,
   CommandSeparator,
+  CommandLoading
 }

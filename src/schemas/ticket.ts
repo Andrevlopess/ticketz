@@ -2,10 +2,22 @@ import { z } from "zod";
 import { PublicUserSchema } from "./user";
 import { group } from "console";
 
-const StatusSchema = z.object({
+
+const OptionSchema = z.object({
   name: z.string(),
   id: z.number(),
 });
+export type Option = z.infer<typeof OptionSchema>;
+
+// id is not required anymore due the new option creation.
+// prisma creates a new option and autogenerate the id.
+const ConnectOrCreateOptionSchema = OptionSchema.partial({id: true})
+
+export type ConnectOrCreateOption = z.infer<typeof ConnectOrCreateOptionSchema>
+
+
+const StatusSchema = OptionSchema
+
 export type Status = z.infer<typeof StatusSchema>;
 
 const GroupSchema = z.object({
@@ -17,7 +29,7 @@ export type Group = z.infer<typeof GroupSchema>;
 
 const TagSchema = z.object({
   name: z.string(),
-  id: z.number(),
+  id: z.number()
 });
 export type Tag = z.infer<typeof TagSchema>;
 
@@ -69,10 +81,10 @@ export const TicketPropertiesSchema = z.object({
   statusId: z.string(),
   priorityId: z.string(),
   groupId: z.string(),
-  solverId: z.string(),
+  // solverId: z.string(),
   companyId: z.string(),
-  solvers: z.array(PublicUserSchema),
-  tags: z.array(TagSchema),
+  // solvers: z.array(PublicUserSchema),
+  tags: z.array(TagSchema.partial({id: true})),
   
 });
 

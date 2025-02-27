@@ -13,20 +13,20 @@ import {
   TicketPropertiesSchema,
 } from "@/schemas/ticket";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import { startTransition, useActionState, useEffect, useRef } from "react";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import { FormState } from "../../types/form-state";
 import { Button } from "../ui/button";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "../ui/form";
-import MultipleSelect from "../ui/multiple-select";
 import {
   Select,
   SelectContent,
@@ -35,6 +35,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import { cn } from "@/lib/utils";
+import { Input } from "../ui/input";
+import { Badge } from "../ui/badge";
+import { ConnectOrCreateOption } from "@/schemas/ticket";
+
+import TagsSelector from "../ui/tags-selector";
 
 const initialState: FormState = {
   success: false,
@@ -49,6 +55,16 @@ interface TicketPropertiesFormProps {
   companies: Company[]
 }
 export default function TicketStatusForm(props: TicketPropertiesFormProps) {
+
+  const defaultValues = {
+    statusId: props.ticket.Status.id.toString(),
+    groupId: props.ticket.Group.id.toString(),
+    priorityId: props.ticket.Priority.id.toString(),
+    companyId: props.ticket.Company.id.toString(),
+    // solvers: props.ticket.Solvers,
+    tags: props.ticket.Tags
+  };
+
   const updateTicketPropertiesWithId = updateTicketProperties.bind(
     null,
     props.ticket.id
@@ -59,35 +75,49 @@ export default function TicketStatusForm(props: TicketPropertiesFormProps) {
     updateTicketPropertiesWithId,
     initialState
   );
-  
+
 
   const form = useForm<TicketProperties>({
-    resolver: zodResolver(TicketPropertiesSchema),
-    defaultValues: {
-      statusId: props.ticket.Status.id.toString(),
-      groupId: props.ticket.Group.id.toString(),
-      priorityId: props.ticket.Priority.id.toString(),
-      companyId: props.ticket.Company.id.toString(),
-      solvers: props.ticket.Solvers,
-      tags: props.ticket.Tags
-    },
+    resolver: zodResolver(TicketPropertiesSchema), defaultValues
   });
+
+
+  const tagsForm = useFieldArray({ control: form.control, name: "tags" })
 
 
 
   const onSubmit = (data: TicketProperties) => {
     console.log(data);
 
-    return
-    
-    startTransition(() => formAction(new FormData(ref.current!)));
+    // return
+
+    // console.log(Object.fromEntries(data));
+    startTransition(() => formAction(data))
+    // startTransition(() => formAction(new FormData(ref.current!)));
+
+
+
+
   };
 
+  const handleAddTag = (data: ConnectOrCreateOption) => {
+    if (tagsForm.fields.some(tag => tag.name === data.name)) {
+      toast({
+        title: `The "${data.name}" tag is already included in this ticket!`,
+        description: "Try adding another tag!",
+        variant: 'destructive'
+      })
+      return
+    };
 
-  console.log(form.getValues(), form.formState.errors);
-  
+    tagsForm.append(data)
+  }
+
+
+
 
   useEffect(() => {
+
     if (formState.success) {
       toast({
         title: "Ticket updated successfully!",
@@ -264,36 +294,50 @@ export default function TicketStatusForm(props: TicketPropertiesFormProps) {
           }}
         />
 
-        
-        <FormField
-          control={form.control}
-          name="tags"
-          render={({ field }) => {
-            const options = props.tags.map(tag => ({ label: tag.name, value: tag.id.toString() }))
+        <div className="w-64">
+          <FormLabel>
+            Tags
+          </FormLabel>
+          <FormDescription>
+            Add tags to your ticket to increase the search performance
+          </FormDescription>
 
-            const selectedOptions =
-            field.value.map(tag => ({ label: tag.name, value: tag.id?.toString() }))
+          <div className="flex flex-wrap gap-2 my-2 ">
 
-            return (
-              <FormItem>
-                <FormLabel>Tags</FormLabel>
-                <FormControl>
-                  <div>
-                    <MultipleSelect
-                      onChange={field.onChange}
-                      selectedOptions={selectedOptions}
-                      options={options}
-                      title="tags"
-                      maxVisibleOptions={5}
-                    />
-                  </div>
+            {tagsForm.fields.map((field, index) => {
+              return (
+                <FormField
+                  control={form.control}
+                  key={field.id}
+                  name={`tags.${index}.name`}
+                  render={({ field }) => (
+                    <FormItem>
 
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            );
-          }}
-        />
+                      <FormControl>
+                        {/* todo add a truncated text if the badge exceed the maximum width */}
+                        <Badge variant='secondary' className="">
+
+                          {field.value}
+
+
+                          <Button className="ml-2 size-4 p-2 " variant="ghost" onClick={() => tagsForm.remove(index)}>
+                            <X className="size-2 shrink-0" />
+                          </Button>
+
+                        </Badge>
+
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )
+            })}
+          </div>
+
+          <TagsSelector ticketId={props.ticket.id} onSelect={handleAddTag} />
+
+        </div>
 
         <Button
           disabled={isPending || !form.formState.isDirty}
