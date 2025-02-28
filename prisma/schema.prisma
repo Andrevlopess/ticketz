@@ -35,6 +35,7 @@ model User {
   deletedAt       DateTime?     @map("deleted_at")
   updatedAt       DateTime      @updatedAt @map("updated_at")
   company         Company[]
+  group           Group[]
   TicketNotes     TicketNotes[]
   createdTickets  Ticket[]      @relation("CreatedTickets")
   resolvedTickets Ticket[]      @relation("ResolvedTickets")
@@ -109,6 +110,7 @@ model Group {
   updatedAt DateTime  @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
   tickets   Ticket[]
+  users     User[]
 
   @@map("groups")
 }

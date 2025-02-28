@@ -2,6 +2,7 @@
 import { prisma } from "@/lib/prisma";
 import {
   NewTicketFormSchema,
+  TicketPreviewDetails,
   TicketProperties,
   TicketPropertiesSchema,
 } from "@/schemas/ticket";
@@ -118,7 +119,7 @@ export async function deleteTicket(
 }
 
 export async function updateTicketProperties(
-  ticketId: number,
+  ticket: TicketPreviewDetails,
   prevState: FormState,
   payload: TicketProperties
 ): Promise<FormState> {
@@ -148,12 +149,18 @@ export async function updateTicketProperties(
       };
     }
 
-    console.log('PARSED', parsed);
-    
+    const existingTags = ticket.Tags.map((tag) => tag.name) || [];
+    const newTags = parsed.data.tags.map((tag) => tag.name);
+
+    const tagsToDisconnect = existingTags
+      .filter((tagName) => !newTags.includes(tagName))
+      .map((tagName) => ({ name: tagName }));
+
+    console.log(ticket.Tags, parsed.data.tags, tagsToDisconnect);
 
     await prisma.ticket.update({
       where: {
-        id: ticketId,
+        id: ticket.id,
       },
       data: {
         statusId: +parsed.data.statusId,
@@ -161,16 +168,16 @@ export async function updateTicketProperties(
         companyId: +parsed.data.companyId,
         groupId: +parsed.data.groupId,
         Tags: {
-          connectOrCreate: parsed.data.tags.map(tag => ({
-            where: {name: tag.name},
-            create: {name: tag.name}
-          }))
-        }
-        
+          disconnect: tagsToDisconnect,
+          connectOrCreate: parsed.data.tags.map((tag) => ({
+            where: { name: tag.name },
+            create: { name: tag.name },
+          })),
+        },
       },
     });
 
-    revalidatePath(`tickets/${ticketId}`);
+    revalidatePath(`tickets/${ticket.id}`);
 
     return {
       success: true,

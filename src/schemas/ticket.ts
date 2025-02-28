@@ -77,7 +77,7 @@ export const TicketPreviewDetailsSchema = z.object({
 export type TicketPreviewDetails = z.infer<typeof TicketPreviewDetailsSchema>;
 
 export const TicketPropertiesSchema = z.object({
-  // ticketId: z.number(),
+  // ticket: TicketPreviewDetailsSchema,
   statusId: z.string(),
   priorityId: z.string(),
   groupId: z.string(),

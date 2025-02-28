@@ -41,6 +41,8 @@ import { Badge } from "../ui/badge";
 import { ConnectOrCreateOption } from "@/schemas/ticket";
 
 import TagsSelector from "../ui/tags-selector";
+import { TicketAssigneePicker } from "./ticket-assignee-picker";
+import TicketAssigneeDialog from "./ticket-assignee-dialog";
 
 const initialState: FormState = {
   success: false,
@@ -57,6 +59,7 @@ interface TicketPropertiesFormProps {
 export default function TicketStatusForm(props: TicketPropertiesFormProps) {
 
   const defaultValues = {
+    // ticket: props.ticket,
     statusId: props.ticket.Status.id.toString(),
     groupId: props.ticket.Group.id.toString(),
     priorityId: props.ticket.Priority.id.toString(),
@@ -67,10 +70,11 @@ export default function TicketStatusForm(props: TicketPropertiesFormProps) {
 
   const updateTicketPropertiesWithId = updateTicketProperties.bind(
     null,
-    props.ticket.id
+    props.ticket
   );
 
   const ref = useRef<HTMLFormElement>(null);
+
   const [formState, formAction, isPending] = useActionState(
     updateTicketPropertiesWithId,
     initialState
@@ -338,6 +342,8 @@ export default function TicketStatusForm(props: TicketPropertiesFormProps) {
           <TagsSelector ticketId={props.ticket.id} onSelect={handleAddTag} />
 
         </div>
+
+        <TicketAssigneeDialog/>
 
         <Button
           disabled={isPending || !form.formState.isDirty}
