@@ -6,16 +6,16 @@
 
 generator client {
   provider = "prisma-client-js"
-  output = "../generated/client"
+  output   = "../generated/client"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
-model Company {
+model Organization {
   id          Int       @id @default(autoincrement())
   name        String    @unique
   logo        String?
@@ -23,117 +23,225 @@ model Company {
   createdAt   DateTime  @default(now()) @map("created_at")
   deletedAt   DateTime? @map("deleted_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
-  userId      Int?
-  User        User?     @relation(fields: [userId], references: [id])
-  Ticket      Ticket[]
 
-  @@map("companies")
+  Ticket     Ticket[]
+  Membership Membership[]
+
+  @@map("organization")
+}
+
+model Membership {
+  organizationId Int
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  userId         Int
+  user           User         @relation(fields: [userId], references: [id])
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  deletedAt DateTime? @map("deleted_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  @@id([organizationId, userId])
+  @@map("membership")
 }
 
 model User {
-  id              Int           @id @default(autoincrement())
-  email           String        @unique
-  first_name      String
-  last_name       String
-  photo           String?       @map("photo_url")
-  phone           String?
-  password        String
-  role            Role          @default(USER)
-  createdAt       DateTime      @default(now()) @map("created_at")
-  deletedAt       DateTime?     @map("deleted_at")
-  updatedAt       DateTime      @updatedAt @map("updated_at")
-  company         Company[]
-  group           Group[]
-  TicketNotes     TicketNotes[]
-  createdTickets  Ticket[]      @relation("CreatedTickets")
-  resolvedTickets Ticket[]      @relation("ResolvedTickets")
+  id    Int    @id @default(autoincrement())
+  email String @unique
 
-  @@map("users")
+  password  String
+  role      Role      @default(USER)
+  createdAt DateTime  @default(now()) @map("created_at")
+  deletedAt DateTime? @map("deleted_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  TicketNotes       TicketNotes[]
+  createdTickets    Ticket[]            @relation("CreatedTickets")
+  organizations     Membership[]
+  assignedTickets   TicketAssignments[] @relation("AssignedTo")
+  assignedByTickets TicketAssignments[] @relation("AssignedBy")
+
+  UsersOnGroup UsersOnGroup[]
+  Profile      Profile?
+
+  @@map("user")
+}
+
+model Profile {
+  id         Int     @id @default(autoincrement())
+  first_name String
+  last_name  String
+  photo      String? @map("photo_url")
+  phone      String?
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  deletedAt DateTime? @map("deleted_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  userId Int  @unique
+  User   User @relation(fields: [userId], references: [id])
+
+  @@map("profile")
 }
 
 model Ticket {
-  id            Int           @id @default(autoincrement())
-  subject       String
-  content       String?
-  groupId       Int
-  companyId     Int
-  statusId      Int
-  priorityId    Int
-  ticketNotesId Int?
-  creatorId     Int
-  createdAt     DateTime      @default(now()) @map("created_at")
-  updatedAt     DateTime      @updatedAt @map("updated_at")
-  deletedAt     DateTime?     @map("deleted_at")
-  notes         TicketNotes[]
-  Company       Company       @relation(fields: [companyId], references: [id])
-  Creator       User          @relation("CreatedTickets", fields: [creatorId], references: [id])
-  Group         Group         @relation(fields: [groupId], references: [id])
-  Priority      Priority      @relation(fields: [priorityId], references: [id])
-  Status        Status        @relation(fields: [statusId], references: [id])
-  Solvers       User[]        @relation("ResolvedTickets")
-  Tags          Tag[]         @relation("TicketTags")
+  id        Int       @id @default(autoincrement())
+  subject   String
+  content   String?
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
 
-  @@map("tickets")
+  notes TicketNotes[]
+
+  organizationId Int
+  Organization   Organization @relation(fields: [organizationId], references: [id])
+
+  createdById Int
+  CreatedBy   User @relation("CreatedTickets", fields: [createdById], references: [id])
+
+  groupId Int?
+  Group   Group? @relation(fields: [groupId], references: [id])
+
+  priorityId Int
+  Priority   Priority @relation(fields: [priorityId], references: [id])
+
+  statusId Int
+  Status   Status @relation(fields: [statusId], references: [id])
+
+  categoryId Int?
+  Category   Category? @relation(fields: [categoryId], references: [id])
+
+  Assignees TicketAssignments[]
+  Tags      TagsOnTicket[]
+
+  @@map("ticket")
 }
 
 model TicketNotes {
   id        Int       @id @default(autoincrement())
   content   String    @unique
   ticketId  Int
-  creatorId Int?
+  creatorId Int
   createdAt DateTime  @default(now()) @map("created_at")
   deletedAt DateTime? @map("deleted_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
-  NoteType  NoteType  @default(PRIVATE)
-  Creator   User?     @relation(fields: [creatorId], references: [id])
-  Ticket    Ticket    @relation(fields: [ticketId], references: [id])
 
-  @@map("ticket_notes")
+  NoteType NoteType @default(PRIVATE)
+  Creator  User     @relation(fields: [creatorId], references: [id])
+  Ticket   Ticket   @relation(fields: [ticketId], references: [id])
+
+  @@map("ticket_note")
+}
+
+model TagsOnTicket {
+  ticketId Int
+  Ticket   Ticket @relation(fields: [ticketId], references: [id])
+  tagId    Int
+  Tag      Tag    @relation(fields: [tagId], references: [id])
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  deletedAt DateTime? @map("deleted_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  @@id([ticketId, tagId])
+  @@map("tags_on_ticket")
+}
+
+model TicketAssignments {
+  ticketId Int
+  Ticket   Ticket @relation(fields: [ticketId], references: [id])
+
+  assigneeId Int
+  Assignee   User @relation("AssignedTo", fields: [assigneeId], references: [id])
+
+  assignerId Int
+  AssignedBy User @relation("AssignedBy", fields: [assignerId], references: [id])
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  deletedAt DateTime? @map("deleted_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  @@id([ticketId, assigneeId])
+  @@map("ticket_assignment")
 }
 
 model Tag {
-  id         Int      @id @default(autoincrement())
-  name       String   @unique
-  created_at DateTime @default(now())
-  Ticket     Ticket[] @relation("TicketTags")
+  id      Int            @id @default(autoincrement())
+  name    String         @unique
+  tickets TagsOnTicket[]
 
-  @@map("tags")
+  createdAt DateTime  @default(now()) @map("created_at")
+  deletedAt DateTime? @map("deleted_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  @@map("tag")
 }
 
 model Status {
   id        Int       @id @default(autoincrement())
-  name      String
+  name      String    @unique
   createdAt DateTime  @default(now()) @map("created_at")
   deletedAt DateTime? @map("deleted_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
   Ticket    Ticket[]
 
-  @@map("statuses")
+  @@map("status")
 }
 
 model Group {
-  id        Int       @id @default(autoincrement())
-  name      String    @unique
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
-  tickets   Ticket[]
-  users     User[]
 
-  @@map("groups")
+  users  UsersOnGroup[]
+  Ticket Ticket[]
+
+  @@map("group")
+}
+
+model UsersOnGroup {
+  userId Int
+  User   User @relation(fields: [userId], references: [id])
+
+  groupId Int
+  Group   Group @relation(fields: [groupId], references: [id])
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  deletedAt DateTime? @map("deleted_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  @@id([userId, groupId])
+  @@map("users_on_group")
 }
 
 model Priority {
   id         Int      @id @default(autoincrement())
-  name       String
+  name       String   @unique
   created_at DateTime @default(now())
   Ticket     Ticket[]
 
-  @@map("priorities")
+  @@map("priority")
+}
+
+model Category {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  description String
+
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  Ticket Ticket[]
+
+  @@map("category")
 }
 
 enum Role {
-  SUPER_ADMIN
+  MASTER
   ADMIN
   USER
 }

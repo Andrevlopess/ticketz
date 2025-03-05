@@ -117,10 +117,134 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
   Serializable: 'Serializable'
 });
 
+exports.Prisma.OrganizationScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  logo: 'logo',
+  description: 'description',
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.MembershipScalarFieldEnum = {
+  organizationId: 'organizationId',
+  userId: 'userId',
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.UserScalarFieldEnum = {
   id: 'id',
   email: 'email',
-  name: 'name'
+  password: 'password',
+  role: 'role',
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ProfileScalarFieldEnum = {
+  id: 'id',
+  first_name: 'first_name',
+  last_name: 'last_name',
+  photo: 'photo',
+  phone: 'phone',
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt',
+  updatedAt: 'updatedAt',
+  userId: 'userId'
+};
+
+exports.Prisma.TicketScalarFieldEnum = {
+  id: 'id',
+  subject: 'subject',
+  content: 'content',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt',
+  organizationId: 'organizationId',
+  createdById: 'createdById',
+  groupId: 'groupId',
+  priorityId: 'priorityId',
+  statusId: 'statusId',
+  categoryId: 'categoryId'
+};
+
+exports.Prisma.TicketNotesScalarFieldEnum = {
+  id: 'id',
+  content: 'content',
+  ticketId: 'ticketId',
+  creatorId: 'creatorId',
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt',
+  updatedAt: 'updatedAt',
+  NoteType: 'NoteType'
+};
+
+exports.Prisma.TagsOnTicketScalarFieldEnum = {
+  ticketId: 'ticketId',
+  tagId: 'tagId',
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.TicketAssignmentsScalarFieldEnum = {
+  ticketId: 'ticketId',
+  assigneeId: 'assigneeId',
+  assignerId: 'assignerId',
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.TagScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.StatusScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.GroupScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+};
+
+exports.Prisma.UsersOnGroupScalarFieldEnum = {
+  userId: 'userId',
+  groupId: 'groupId',
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.PriorityScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  created_at: 'created_at'
+};
+
+exports.Prisma.CategoryScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
 };
 
 exports.Prisma.SortOrder = {
@@ -137,10 +261,32 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
+exports.Role = exports.$Enums.Role = {
+  MASTER: 'MASTER',
+  ADMIN: 'ADMIN',
+  USER: 'USER'
+};
 
+exports.NoteType = exports.$Enums.NoteType = {
+  PUBLIC: 'PUBLIC',
+  PRIVATE: 'PRIVATE'
+};
 
 exports.Prisma.ModelName = {
-  User: 'User'
+  Organization: 'Organization',
+  Membership: 'Membership',
+  User: 'User',
+  Profile: 'Profile',
+  Ticket: 'Ticket',
+  TicketNotes: 'TicketNotes',
+  TagsOnTicket: 'TagsOnTicket',
+  TicketAssignments: 'TicketAssignments',
+  Tag: 'Tag',
+  Status: 'Status',
+  Group: 'Group',
+  UsersOnGroup: 'UsersOnGroup',
+  Priority: 'Priority',
+  Category: 'Category'
 };
 
 /**
