@@ -7,13 +7,12 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { PublicUser } from "@/types/users";
 import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 
 interface AvatarTooltipProps extends React.ComponentProps<typeof Avatar> {
-  user: PublicUser;
+  user: any;
 }
 
 export default function AvatarTooltip({ user, ...props }: AvatarTooltipProps) {
@@ -43,7 +42,7 @@ export default function AvatarTooltip({ user, ...props }: AvatarTooltipProps) {
 }
 
 interface UsersAvatarProps {
-  users: PublicUser[];
+  users: any[];
   maxUsers?: number;
 }
 

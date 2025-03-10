@@ -16,7 +16,7 @@ interface TicketCreatorCardProps {
   creator: PublicUser;
 }
 
-export default function TicketCreatorCard({ creator }: TicketCreatorCardProps) {
+export default function TicketCreatorCard({ creator }: any) {
   return (
     <Card>
       <CardHeader>
@@ -30,7 +30,12 @@ export default function TicketCreatorCard({ creator }: TicketCreatorCardProps) {
               <AvatarImage src={creator.photo} alt={creator.first_name} />
             )} */}
             <AvatarFallback>
-              {`${creator.first_name[0].toUpperCase()} ${creator.last_name[0].toUpperCase()}`}
+              {`
+              ${creator.first_name.charAt(0).toUpperCase()} 
+              ${creator.last_name.charAt(0).toUpperCase()}
+              `}
+
+
             </AvatarFallback>
           </Avatar>
           <div className="flex flex-col">

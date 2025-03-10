@@ -8,7 +8,7 @@ import TicketViewOptionsMenu, {
 import TicketViewHeader from "./ticket-view-header";
 
 interface Props {
-  ticket: TicketPreviewDetails;
+  ticket: any;
 }
 
 export default function TicketView({ ticket }: Props) {

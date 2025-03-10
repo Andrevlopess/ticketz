@@ -7,16 +7,11 @@ import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import Link from "next/link";
 import React from "react";
 
-interface Props {
-  children: React.ReactNode;
-  id: string;
-}
+
 export default async function Page({
-  children,
-  id,
+  children
 }: {
   children: React.ReactNode;
-  id: string;
 }) {
   return (
     <>

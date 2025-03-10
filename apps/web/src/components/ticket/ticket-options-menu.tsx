@@ -37,7 +37,7 @@ export default async function TicketViewOptionsMenu({
         },
       }),
 
-      prisma.company.findMany({
+      prisma.organization.findMany({
         select: {
           id: true,
           name: true,

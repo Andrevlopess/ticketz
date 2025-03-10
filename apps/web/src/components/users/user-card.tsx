@@ -15,7 +15,7 @@ export default function UserCard({ user }: { user: User  }) {
         alt={user.name}
       /> */}
       <div className="px-4 py-2">
-        <div className="font-bold text-xl mb-2 text-gray-50">{user.first_name}</div>
+        <div className="font-bold text-xl mb-2 text-gray-50">{user.id}</div>
         <p className="text-gray-200 text-base">{user.email}</p>
       </div>
     </button>

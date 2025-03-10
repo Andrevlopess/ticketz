@@ -18,7 +18,7 @@ export function TicketPreview({ticket}: Props) {
     <Card >
       <CardHeader>
         <CardTitle>{ticket.subject}</CardTitle>
-        <CardDescription>{ticket.creatorId}</CardDescription>
+        <CardDescription>{ticket.createdById}</CardDescription>
       </CardHeader>
       <CardContent>
         <p>{ticket.content}</p>

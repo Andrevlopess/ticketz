@@ -13,11 +13,13 @@ export default async function TicketAssigneeDialog() {
             name: true,
             users: {
                 select: {
-                    id: true,
-                    first_name: true,
-                    last_name: true,
-                    email: true,
-                    photo: true,
+                    User: {
+                        select: {
+                            id: true,
+                            Profile: true,
+                            email: true,
+                        }
+                    }
                 }
             }
         },

@@ -31,9 +31,9 @@ export async function newTaskAction(
 
     const fields: Record<string, string> = {};
 
-    for (const key of Object.keys(formData)) {
-      fields[key] = formData[key]?.toString();
-    }
+    // for (const key of Object.keys(formData)) {
+    //   fields[key] = formData[key]?.toString();
+    // }
 
     return {
       success: false,
@@ -47,8 +47,8 @@ export async function newTaskAction(
       subject: parsed.data.subject,
       content: parsed.data.content,
       priorityId: 1,
-      companyId: 1,
-      creatorId: 7,
+      organizationId: 1,
+      createdById: 7,
       statusId: 1,
       groupId: 1,
     },
@@ -85,9 +85,9 @@ export async function deleteTicket(
 
     const fields: Record<string, string> = {};
 
-    for (const key of Object.keys(formData)) {
-      fields[key] = formData[key].toString();
-    }
+    // for (const key of Object.keys(formData)) {
+    //   fields[key] = formData[key].toString();
+    // }
 
     return {
       success: false,
@@ -165,15 +165,15 @@ export async function updateTicketProperties(
       data: {
         statusId: +parsed.data.statusId,
         priorityId: +parsed.data.priorityId,
-        companyId: +parsed.data.companyId,
+        organizationId: +parsed.data.companyId,
         groupId: +parsed.data.groupId,
-        Tags: {
-          disconnect: tagsToDisconnect,
-          connectOrCreate: parsed.data.tags.map((tag) => ({
-            where: { name: tag.name },
-            create: { name: tag.name },
-          })),
-        },
+        // Tags: {
+        //   disconnect: tagsToDisconnect,
+        //   connectOrCreate: parsed.data.tags.map((tag) => ({
+        //     where: { name: tag.name },
+        //     create: { name: tag.name },
+        //   })),
+        // },
       },
     });
 

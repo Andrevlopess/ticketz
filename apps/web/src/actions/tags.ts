@@ -14,11 +14,16 @@ export default async function fetchTicketAvaliableTags(
           mode: "insensitive",
         },
         NOT: {
-          Ticket: {
-            some: {
-              id: ticketId,
-            },
-          },
+          tickets:{
+            some:{
+              ticketId
+            }
+          }
+          // Ticket: {
+          //   some: {
+          //     id: ticketId,
+          //   },
+          // },
         },
       },
       select: {
@@ -31,6 +36,7 @@ export default async function fetchTicketAvaliableTags(
   } catch (error) {
     throw error;
   }
+
 }
 
 // select * from tags a where name like '%name%' and not exists (select null from tags aa where a.name = aa.name)

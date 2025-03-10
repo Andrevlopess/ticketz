@@ -1,17 +1,17 @@
-import { prisma } from "database";
+import { prisma } from "@/lib/prisma";
 
 export default async function Home() {
   
   const user = await prisma.user.findFirst({
     select: {
-      name: true
+      id: true
     }
   })
 
   return (
     <div>
-      {user?.name && <p>Hello from {user.name}</p>}
-      {!user?.name && <p>No user has been added to the database yet. </p>}
+      {user?.id && <p>Hello from {user.id}</p>}
+      {!user?.id && <p>No user has been added to the database yet. </p>}
     </div>
   );
 }

@@ -9,30 +9,28 @@ interface Params {
 }
 
 export default async function Page({ params }: { params: Promise<Params> }) {
-  const id = (await params).id;
+  // const id = (await params).id;
 
-  if (!parseInt(id)) {
-    return notFound();
-  }
+  // if (!parseInt(id)) {
+  //   return notFound();
+  // }
 
   const ticket = await prisma.ticket.findUnique({
     where: {
-      id: parseInt(id),
+      id: 5,
     },
     select: {
       id: true,
       subject: true,
       content: true,
-      Creator: {
+      CreatedBy: {
         select: {
           id: true,
-          first_name: true,
-          last_name: true,
+          Profile: true,
           email: true,
-          photo: true,
         },
       },
-      Company: {
+      Organization: {
         select: {
           name: true,
           id: true,
@@ -56,19 +54,21 @@ export default async function Page({ params }: { params: Promise<Params> }) {
           id: true,
         },
       },
-      Solvers: {
+      Assignees: {
         select: {
-          id: true,
-          first_name: true,
-          last_name: true,
-          email: true,
-          photo: true,
+          AssignedBy: {
+            select: {
+              id: true,
+              Profile: true,
+              email: true,
+            },
+          }
         },
       },
       Tags: {
         select: {
-          id: true,
-          name: true,
+          tagId: true,
+          Tag: true,
         },
       },
       createdAt: true,
@@ -165,12 +165,12 @@ export default async function Page({ params }: { params: Promise<Params> }) {
       <div className="">
         <Suspense fallback={<p>loading</p>}>
 
-          <TicketView ticket={ticket} />
+          {/* <TicketView ticket={ticket} /> */}
         </Suspense>
 
       </div>
       <div className="md:hidden">
-        <TicketCreatorCard creator={ticket.Creator} />
+        {/* <TicketCreatorCard creator={ticket.CreatedBy} /> */}
       </div>
     </div>
   );

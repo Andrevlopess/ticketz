@@ -10,7 +10,7 @@ import { DataTableColumnHeader } from "./data-table-column-header";
 import { DataTableRowActions } from "./data-table-row-actions";
 import { TicketPreviewDetails } from "@/schemas/ticket";
 
-export const ticketsColumns: ColumnDef<TicketPreviewDetails>[] = [
+export const ticketsColumns: ColumnDef<any>[] = [
   {
     id: "select",
     header: ({ table }) => (
