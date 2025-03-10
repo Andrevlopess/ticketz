@@ -1,19 +1,25 @@
-import { Injectable } from '@nestjs/common';
-import { CreateProductRequest, Product } from '@ticketz/types';
+import { Inject, Injectable } from '@nestjs/common';
+import {
+  DrizzleAsyncProvider,
+  GlobalSchema,
+  User,
+  UserDto,
+} from '@ticketz/database';
+import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
 @Injectable()
 export class ProductsService {
-    private readonly products: Product[] = [];
-    
-    createProduct(product: CreateProductRequest) {
-        this.products.push({
-            ...product,
-            id: Math.random().toString(36).substring(5),
-        });
-        return product;
-    }
-    
-    getProducts() {
-        return this.products;
-    }
+  constructor(
+    @Inject(DrizzleAsyncProvider)
+    private db: NodePgDatabase<typeof GlobalSchema>,
+  ) {}
+
+  createProduct(product: UserDto) {
+    const newUser = this.db.insert(User).values(product).returning();
+    return newUser;
+  }
+
+  getProducts() {
+    return this.db.select().from(User);
+  }
 }

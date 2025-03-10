@@ -120,8 +120,10 @@ model Ticket {
 model TicketNotes {
   id        Int       @id @default(autoincrement())
   content   String    @unique
+  
   ticketId  Int
   creatorId Int
+
   createdAt DateTime  @default(now()) @map("created_at")
   deletedAt DateTime? @map("deleted_at")
   updatedAt DateTime  @updatedAt @map("updated_at")

@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1741635111124,
+      "tag": "0000_safe_logan",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1741637234408,
+      "tag": "0001_membership_relations",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1741641242431,
+      "tag": "0002_tags_relations",
+      "breakpoints": true
+    }
+  ]
+}
