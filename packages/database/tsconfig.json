@@ -6,7 +6,6 @@
     },
     "include": [
         "src",
-        "teste.ts"
     ],
     "exclude": [
         "node_modules",

@@ -35,12 +35,18 @@ importers:
       '@nestjs/platform-express':
         specifier: ^11.0.1
         version: 11.0.11(@nestjs/common@11.0.11(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.0.11)
+      '@ticketz/database':
+        specifier: workspace:*
+        version: link:../../packages/database
       dotenv:
         specifier: ^16.4.7
         version: 16.4.7
       drizzle-orm:
         specifier: ^0.40.0
         version: 0.40.0(@prisma/client@6.4.1(prisma@6.4.1(typescript@5.8.2))(typescript@5.8.2))(@types/pg@8.11.11)(gel@2.0.1)(pg@8.13.3)(prisma@6.4.1(typescript@5.8.2))
+      drizzle-zod:
+        specifier: ^0.7.0
+        version: 0.7.0(drizzle-orm@0.40.0(@prisma/client@6.4.1(prisma@6.4.1(typescript@5.8.2))(typescript@5.8.2))(@types/pg@8.11.11)(gel@2.0.1)(pg@8.13.3)(prisma@6.4.1(typescript@5.8.2)))(zod@3.24.2)
       pg:
         specifier: ^8.13.3
         version: 8.13.3
@@ -50,6 +56,9 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.2
+      zod:
+        specifier: ^3.24.2
+        version: 3.24.2
     devDependencies:
       '@eslint/eslintrc':
         specifier: ^3.2.0
@@ -72,9 +81,6 @@ importers:
       '@swc/core':
         specifier: ^1.10.7
         version: 1.11.8(@swc/helpers@0.5.15)
-      '@ticketz/database':
-        specifier: workspace:*
-        version: link:../../packages/database
       '@ticketz/types':
         specifier: workspace:*
         version: link:../../packages/types
@@ -88,7 +94,7 @@ importers:
         specifier: ^29.5.14
         version: 29.5.14
       '@types/node':
-        specifier: ^22.10.7
+        specifier: ^22.13.9
         version: 22.13.9
       '@types/pg':
         specifier: ^8.11.11
@@ -3370,6 +3376,12 @@ packages:
         optional: true
       sqlite3:
         optional: true
+
+  drizzle-zod@0.7.0:
+    resolution: {integrity: sha512-xgCRYYVEzRkeXTS33GSMgoowe3vKsMNBjSI+cwG1oLQVEhAWWbqtb/AAMlm7tkmV4fG/uJjEmWzdzlEmTgWOoQ==}
+    peerDependencies:
+      drizzle-orm: '>=0.36.0'
+      zod: '>=3.0.0'
 
   dunder-proto@1.0.1:
     resolution: {integrity: sha512-KIN/nDJBQRcXw0MLVhZE9iQHmG68qAVIBg9CqmUYjmQIhgij9U5MFvrqkUL5FbtyyzZuOeOt0zdeRe4UY7ct+A==}
@@ -8919,6 +8931,11 @@ snapshots:
       gel: 2.0.1
       pg: 8.13.3
       prisma: 6.4.1(typescript@5.8.2)
+
+  drizzle-zod@0.7.0(drizzle-orm@0.40.0(@prisma/client@6.4.1(prisma@6.4.1(typescript@5.8.2))(typescript@5.8.2))(@types/pg@8.11.11)(gel@2.0.1)(pg@8.13.3)(prisma@6.4.1(typescript@5.8.2)))(zod@3.24.2):
+    dependencies:
+      drizzle-orm: 0.40.0(@prisma/client@6.4.1(prisma@6.4.1(typescript@5.8.2))(typescript@5.8.2))(@types/pg@8.11.11)(gel@2.0.1)(pg@8.13.3)(prisma@6.4.1(typescript@5.8.2))
+      zod: 3.24.2
 
   dunder-proto@1.0.1:
     dependencies:

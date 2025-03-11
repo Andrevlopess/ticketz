@@ -17,9 +17,7 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json",
-    "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate"
+    "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
@@ -27,11 +25,14 @@
     "@nestjs/core": "^11.0.1",
     "@nestjs/mapped-types": "*",
     "@nestjs/platform-express": "^11.0.1",
+    "@ticketz/database": "workspace:*",
     "dotenv": "^16.4.7",
     "drizzle-orm": "^0.40.0",
+    "drizzle-zod": "^0.7.0",
     "pg": "^8.13.3",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
@@ -43,10 +44,9 @@
     "@swc/core": "^1.10.7",
     "@ticketz/types": "workspace:*",
     "@ticketz/typescript-config": "workspace:*",
-    "@ticketz/database": "workspace:*",
     "@types/express": "^5.0.0",
     "@types/jest": "^29.5.14",
-    "@types/node": "^22.10.7",
+    "@types/node": "^22.13.9",
     "@types/pg": "^8.11.11",
     "@types/supertest": "^6.0.2",
     "drizzle-kit": "^0.30.5",
