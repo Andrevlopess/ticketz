@@ -5,7 +5,13 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { GlobalSchema, Profile, User, UserInsert } from '@ticketz/database';
+import {
+  GlobalSchema,
+  Profile,
+  User,
+  UserInsert,
+  UserSelect,
+} from '@ticketz/database';
 import { eq, getTableColumns, isNull, sql } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { createInsertSchema, createUpdateSchema } from 'drizzle-zod';
@@ -19,7 +25,11 @@ const UserUpdateSchema = createUpdateSchema(User)
 
 export type UserUpdate = z.infer<typeof UserUpdateSchema>;
 
-
+export type InMemoryUser = {
+  id: number;
+  email: string;
+  password: string;
+};
 
 @Injectable()
 export class UsersService {
@@ -27,6 +37,19 @@ export class UsersService {
     @Inject(DrizzleAsyncProvider)
     private db: NodePgDatabase<typeof GlobalSchema>,
   ) {}
+
+  private readonly users: InMemoryUser[] = [
+    {
+      id: 1,
+      email: 'andrellopes021@gmail.com',
+      password: 'changeme',
+    },
+    {
+      id: 2,
+      email: 'andrellopes023@gmail.com',
+      password: 'guess',
+    },
+  ];
 
   //todo: insert many users at once
   async create(createUserDto: UserInsert) {
@@ -88,6 +111,10 @@ export class UsersService {
     return user;
   }
 
+  async findUserByEmail(email: string): Promise<InMemoryUser | undefined> {
+    return this.users.find((user) => user.email === email);
+  }
+
   async update(id: number, updateUserDto: UserUpdate) {
     const parsed = UserUpdateSchema.safeParse(updateUserDto);
 
@@ -141,6 +168,4 @@ export class UsersService {
       .where(eq(User.id, id))
       .returning();
   }
-
- 
 }

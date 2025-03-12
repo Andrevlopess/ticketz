@@ -1,16 +1,15 @@
 import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Param,
+    Patch,
+    Post,
 } from '@nestjs/common';
-import { UserUpdate } from 'src/users/users.service';
-import { ProfilesService } from './profiles.service';
-import type { ProfileUpdate, RegisterInsert } from './profiles.service';
 import type { ProfileInsert } from '@ticketz/database';
+import type { ProfileUpdate, RegisterInsert } from './profiles.service';
+import { ProfilesService } from './profiles.service';
 
 @Controller('profiles')
 export class ProfilesController {

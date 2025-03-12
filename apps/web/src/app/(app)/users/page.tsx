@@ -1,17 +1,26 @@
-import { prisma } from "@/lib/prisma";
+"use client"
 
-export default async function Home() {
-  
-  const user = await prisma.user.findFirst({
-    select: {
-      id: true
-    }
-  })
+import { Input } from "@/components/ui/input";
+import { useState } from "react";
+
+export default function Home() {
+
+  const [teste, setTeste] = useState('')
+  const [teste2, setTeste2] = useState('')
+  const [teste3, setTeste3] = useState('')
+
+  console.log('renderizei');
 
   return (
     <div>
-      {user?.id && <p>Hello from {user.id}</p>}
-      {!user?.id && <p>No user has been added to the database yet. </p>}
+      {teste}
+
+      {/* <input type="text"  /> */}
+
+      <Input value={teste} onChange={e => setTeste(e.target.value)} />
+      <Input value={teste2} onChange={e => setTeste2(e.target.value)} />
+      <Input value={teste3} onChange={e => setTeste3(e.target.value)} />
+
     </div>
   );
 }
