@@ -57,7 +57,7 @@ export class AuthService {
       { sub: payload.sub },
       {
         secret: appConfig().jwtRefreshSecret,
-        expiresIn: '1h',
+        expiresIn: '1d',
       },
     );
   }

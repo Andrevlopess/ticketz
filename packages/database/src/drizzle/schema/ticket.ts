@@ -29,7 +29,7 @@ export const Ticket = table("ticket", {
     .references(() => Status.id),
 
   groupId: integer()
-    .notNull()
+    // .notNull()
     .references(() => Group.id),
 
   priorityId: integer()
@@ -37,7 +37,7 @@ export const Ticket = table("ticket", {
     .references(() => Priority.id),
 
   categoryId: integer()
-    .notNull()
+    // .notNull()
     .references(() => Category.id),
 
   ...timestamps,
@@ -48,7 +48,7 @@ export const TicketRelations = relations(Ticket, ({ one, many }) => ({
     fields: [Ticket.organizationId],
     references: [Organization.id],
   }),
-  user: one(User, { fields: [Ticket.createdById], references: [User.id] }),
+  createdBy: one(User, { fields: [Ticket.createdById], references: [User.id] }),
 
   tags: many(Tag),
   notes: many(TicketNote),

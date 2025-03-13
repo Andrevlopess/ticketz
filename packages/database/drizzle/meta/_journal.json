@@ -8,6 +8,13 @@
       "when": 1741702789185,
       "tag": "0000_init_db",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1741898545542,
+      "tag": "0001_free_tempest",
+      "breakpoints": true
     }
   ]
 }
