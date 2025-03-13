@@ -1,32 +1,15 @@
-import {
-  Controller,
-  Get
-} from '@nestjs/common';
+import { Controller, Get, Post, Req, Res } from '@nestjs/common';
 import { AppService } from './app.service';
+import type { Request, Response } from 'express';
+import { Public } from './decorators/public.decorator';
 
 @Controller()
 export class AppController {
-  constructor(
-    private readonly appService: AppService,
-    // private readonly authService: AuthService,
-  ) {}
+  constructor(private readonly appService: AppService) {}
 
   @Get()
+  @Public()
   root() {
     return this.appService.getRoot();
   }
-
-  // @Public()
-  // @UseGuards(LocalAuthGuard)
-  // @Post('auth/login')
-  // login(@Body() teste: any) {
-  //   // return teste
-  //   return this.authService.login(teste);
-  // }
-
-  // @UseGuards(JwtAuthGuard)
-  // @Get('profile')
-  // getProfile(@Request() req) {
-  //   return req.user
-  // }
 }

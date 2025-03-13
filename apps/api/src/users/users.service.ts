@@ -24,12 +24,7 @@ const UserUpdateSchema = createUpdateSchema(User)
   .strict();
 
 export type UserUpdate = z.infer<typeof UserUpdateSchema>;
-
-export type InMemoryUser = {
-  id: number;
-  email: string;
-  password: string;
-};
+type ValidateUser = Pick<UserSelect, 'id' | 'email' | 'password'>;
 
 @Injectable()
 export class UsersService {
@@ -37,19 +32,6 @@ export class UsersService {
     @Inject(DrizzleAsyncProvider)
     private db: NodePgDatabase<typeof GlobalSchema>,
   ) {}
-
-  private readonly users: InMemoryUser[] = [
-    {
-      id: 1,
-      email: 'andrellopes021@gmail.com',
-      password: 'changeme',
-    },
-    {
-      id: 2,
-      email: 'andrellopes023@gmail.com',
-      password: 'guess',
-    },
-  ];
 
   //todo: insert many users at once
   async create(createUserDto: UserInsert) {
@@ -111,8 +93,18 @@ export class UsersService {
     return user;
   }
 
-  async findUserByEmail(email: string): Promise<InMemoryUser | undefined> {
-    return this.users.find((user) => user.email === email);
+  async findUserByEmail(email: string): Promise<ValidateUser | undefined> {
+    
+    const [user] = await this.db
+      .select({
+        id: User.id,
+        email: User.email,
+        password: User.password,
+      })
+      .from(User)
+      .where(eq(User.email, email));
+
+    return user;
   }
 
   async update(id: number, updateUserDto: UserUpdate) {

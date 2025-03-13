@@ -10,6 +10,7 @@ import {
 import type { ProfileInsert } from '@ticketz/database';
 import type { ProfileUpdate, RegisterInsert } from './profiles.service';
 import { ProfilesService } from './profiles.service';
+import { Public } from 'src/decorators/public.decorator';
 
 @Controller('profiles')
 export class ProfilesController {
@@ -40,6 +41,7 @@ export class ProfilesController {
     return this.profileService.remove(+id);
   }
 
+  @Public()
   @Post('register')
   register(@Body() registerUserDto: RegisterInsert) {
     return this.profileService.register(registerUserDto);

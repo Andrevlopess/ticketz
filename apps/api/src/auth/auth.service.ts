@@ -1,9 +1,13 @@
+import bcrypt from 'bcrypt';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { InMemoryUser, UsersService } from './../users/users.service';
+import { UsersService } from './../users/users.service';
+import { AuthInput, AuthResponse, RefreshTokenInput } from '@ticketz/types';
+import appConfig from 'src/config/app.config';
 
-export type AuthInput = { email: string; password: string };
-export type AuthResult = { accessToken: string; sub: number; email: string };
+type RefreshTokenPayload = { sub: number };
+type AccessTokenPayload = { sub: number; email: string };
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -11,40 +15,77 @@ export class AuthService {
     private readonly usersService: UsersService,
   ) {}
 
-  async validateUser(
-    data: AuthInput,
-  ): Promise<Omit<InMemoryUser, 'password'> | null> {
+  async validateUser(data: AuthInput): Promise<AccessTokenPayload | null> {
     const user = await this.usersService.findUserByEmail(data.email);
+    if (!user) return null;
 
-    if (user && user.password === data.password) {
-      const { password, ...result } = user;
-      return result;
-    }
+    const validPassword = await bcrypt.compare(data.password, user.password);
+    if (!validPassword) return null;
 
-    return null;
+    return {
+      sub: user.id,
+      email: user.email,
+    };
   }
 
-  async authenticate(userData: AuthInput): Promise<AuthResult> {
-    const user = await this.validateUser(userData);
+  async authenticate(user: AuthInput): Promise<AuthResponse> {
+    const validUser = await this.validateUser(user);
 
-    if (!user) {
+    if (!validUser) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    return this.signIn(user)
-  }
-
-  async signIn(user: any): Promise<AuthResult> {
-    const tokenPayload = {
-      sub: user.userId,
-      email: user.email,
-    };
-
-    const accessToken = await this.jwtService.signAsync(tokenPayload);
+    const accessToken = await this._generateAccessToken(validUser);
+    const refreshToken = await this._generateRefreshToken(validUser);
 
     return {
-      ...tokenPayload,
       accessToken,
+      refreshToken,
     };
+  }
+
+  private async _generateAccessToken(
+    payload: AccessTokenPayload,
+  ): Promise<string> {
+    return await this.jwtService.signAsync(payload);
+  }
+
+  private async _generateRefreshToken(
+    payload: RefreshTokenPayload,
+  ): Promise<string> {
+    return await this.jwtService.signAsync(
+      { sub: payload.sub },
+      {
+        secret: appConfig().jwtRefreshSecret,
+        expiresIn: '1h',
+      },
+    );
+  }
+
+  async refreshToken(token: string): Promise<AuthResponse> {
+    try {
+      const payload: AccessTokenPayload = await this.jwtService.verifyAsync(
+        token,
+        {
+          secret: appConfig().jwtRefreshSecret,
+        },
+      );
+
+      const accessToken = await this._generateAccessToken({
+        sub: payload.sub,
+        email: payload.email,
+      });
+
+      const refreshToken = await this._generateRefreshToken({
+        sub: payload.sub,
+      });
+
+      return {
+        accessToken,
+        refreshToken,
+      };
+    } catch (error) {
+      throw new UnauthorizedException(error);
+    }
   }
 }

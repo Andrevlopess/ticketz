@@ -11,6 +11,7 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { createInsertSchema, createUpdateSchema } from 'drizzle-zod';
 import { DrizzleAsyncProvider } from 'src/drizzle/drizzle.provider';
 import { z } from 'zod';
+import bcrypt from 'bcrypt';
 
 const ProfileUpdateSchema = createUpdateSchema(Profile)
   .omit({ userId: true })
@@ -193,7 +194,11 @@ export class ProfilesService {
       });
     }
 
-    const register = await this.db.transaction(async (trx) => {
+    const hashedPassword = await bcrypt.hashSync(registerUserDto.password, 10);
+
+    const user = await this.db.transaction(async (trx) => {
+      registerUserDto.password = hashedPassword;
+
       const [user] = await trx.insert(User).values(registerUserDto).returning();
 
       if (!user) {
@@ -214,9 +219,10 @@ export class ProfilesService {
         });
       }
 
-      return { user, profile };
+      return { ...user, ...profile };
     });
 
+    const { password, ...register } = user;
     return register;
   }
 }
