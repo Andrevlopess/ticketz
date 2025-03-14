@@ -16,6 +16,7 @@ import { eq, getTableColumns, isNull, sql } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { createInsertSchema, createUpdateSchema } from 'drizzle-zod';
 import { DrizzleAsyncProvider } from 'src/drizzle/drizzle.provider';
+import { ZodException } from 'src/handlers/zod.exception';
 import { z } from 'zod';
 
 // User is not allowed to update the email
@@ -94,7 +95,6 @@ export class UsersService {
   }
 
   async findUserByEmail(email: string): Promise<ValidateUser | undefined> {
-    
     const [user] = await this.db
       .select({
         id: User.id,
@@ -110,24 +110,8 @@ export class UsersService {
   async update(id: number, updateUserDto: UserUpdate) {
     const parsed = UserUpdateSchema.safeParse(updateUserDto);
 
-    const unrecognizedKeys = parsed.error?.issues.find(
-      (issue) => issue.code === 'unrecognized_keys',
-    );
-
-    if (unrecognizedKeys) {
-      throw new BadRequestException(
-        `You are not allowed to update ${unrecognizedKeys.keys[0]} or this key doens't exists.`,
-        {
-          cause: new Error(),
-          description: `Unrecognized keys: ${unrecognizedKeys.keys.join(', ')}.`,
-        },
-      );
-    }
     if (!parsed.success) {
-      throw new BadRequestException(parsed.error.issues[0]?.message, {
-        cause: new Error(),
-        description: JSON.stringify(parsed.error.issues[0]),
-      });
+      throw new ZodException(parsed.error);
     }
 
     const updatedUser = this.db
@@ -148,10 +132,7 @@ export class UsersService {
     });
 
     if (!user) {
-      throw new NotFoundException('User not found', {
-        cause: new Error(),
-        description: `User with id ${id} not found`,
-      });
+      throw new NotFoundException(`User with id ${id} found.`);
     }
 
     return this.db

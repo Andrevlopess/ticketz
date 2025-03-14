@@ -1,5 +1,10 @@
 import { relations } from "drizzle-orm";
-import { integer, pgEnum, pgTable as table, varchar } from "drizzle-orm/pg-core";
+import {
+  integer,
+  pgEnum,
+  pgTable as table,
+  varchar,
+} from "drizzle-orm/pg-core";
 import { timestamps } from "../columns.helpers";
 import { UsersOnGroup } from "./group";
 import { MemberShip } from "./membership";
@@ -20,15 +25,14 @@ export const User = table("user", {
 });
 
 export const UserRelations = relations(User, ({ one, many }) => ({
-  profile: one(Profile),
+  // profile: one(Profile),
   memberships: many(MemberShip),
-  notes: many(TicketNote),
+  notes: many(TicketNote, {relationName: "notesOnTicket"}),
   usersOnGroup: many(UsersOnGroup),
-  assignees: many(TicketAssignments),
-  assigner: many(TicketAssignments),
-  createdTickets: many(Ticket)
+  assignees: many(TicketAssignments, { relationName: "assigneesOnTicket" }),
+  assigner: many(TicketAssignments, { relationName: "assignersOnTicket" }),
+  createdTickets: many(Ticket),
 }));
-
 
 export type UserSelect = typeof User.$inferSelect;
 export type UserInsert = typeof User.$inferInsert;

@@ -80,6 +80,6 @@ export class AuthController {
   getUserInfo(@Req() req: Request) {
     // req.user is infered on the jwt guard.
     // req.user is the token decoded data
-    return req.user;
+    return req.user
   }
 }

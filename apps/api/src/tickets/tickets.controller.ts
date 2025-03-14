@@ -1,7 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { TicketsService } from './tickets.service';
-import type { TicketInsert } from '@ticketz/database';
-
+import type { TagInsert, TicketInsert } from '@ticketz/database';
 
 @Controller('tickets')
 export class TicketsController {

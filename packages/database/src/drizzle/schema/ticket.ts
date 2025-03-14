@@ -6,7 +6,7 @@ import { Group } from "./group";
 import { Organization } from "./organization";
 import { Priority } from "./priority";
 import { Status } from "./status";
-import { Tag } from "./tag";
+import { Tag, TagsOnTicket, TagsOnTicketRelations } from "./tag";
 import { TicketAssignments } from "./ticket-assignment";
 import { TicketNote } from "./ticket-note";
 import { User } from "./user";
@@ -50,9 +50,9 @@ export const TicketRelations = relations(Ticket, ({ one, many }) => ({
   }),
   createdBy: one(User, { fields: [Ticket.createdById], references: [User.id] }),
 
-  tags: many(Tag),
-  notes: many(TicketNote),
-  assignees: many(TicketAssignments),
+  tagsOnTicket: many(TagsOnTicket),
+  notesOnTicket: many(TicketNote),
+  assigneesOnTicket: many(TicketAssignments),
 
   status: one(Status, { fields: [Ticket.statusId], references: [Status.id] }),
   group: one(Group, { fields: [Ticket.groupId], references: [Group.id] }),
@@ -65,7 +65,6 @@ export const TicketRelations = relations(Ticket, ({ one, many }) => ({
     references: [Category.id],
   }),
 }));
-
 
 export type TicketSelect = typeof Ticket.$inferSelect;
 export type TicketInsert = typeof Ticket.$inferInsert;

@@ -12,7 +12,7 @@ export const Tag = pgTable("tag", {
 });
 
 export const TagRelations = relations(Tag, ({ many }) => ({
-  tickets: many(Ticket),
+  tagsOnTicket: many(TagsOnTicket),
 }));
 
 export const TagsOnTicket = pgTable(

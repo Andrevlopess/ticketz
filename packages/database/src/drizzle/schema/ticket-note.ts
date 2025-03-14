@@ -20,6 +20,7 @@ export const TicketNote = table("ticketNotes", {
 
 export const TicketNotesRelations = relations(TicketNote, ({ one }) => ({
   ticket: one(Ticket, {
+    relationName: 'notesOnTicket',
     fields: [TicketNote.ticketId],
     references: [Ticket.id],
   }),
