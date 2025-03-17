@@ -8,6 +8,8 @@ export const Group = pgTable("group", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   name: varchar().unique().notNull(),
 
+  description: varchar(),
+
   ...timestamps,
 });
 

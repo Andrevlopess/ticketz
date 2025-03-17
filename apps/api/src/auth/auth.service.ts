@@ -1,9 +1,9 @@
-import bcrypt from 'bcrypt';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UsersService } from './../users/users.service';
-import { AuthInput, AuthResponse, RefreshTokenInput } from '@ticketz/types';
+import { AuthInput, AuthResponse } from '@ticketz/types';
+import bcrypt from 'bcrypt';
 import appConfig from 'src/config/app.config';
+import { UsersService } from '../schemas/users/users.service';
 
 type RefreshTokenPayload = { sub: number };
 type AccessTokenPayload = { sub: number; email: string };

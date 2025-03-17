@@ -10,6 +10,7 @@ export const Profile = table("profile", {
 
   photoUrl: varchar(),
   phone: varchar(),
+  jobTitle: varchar(),
 
   userId: integer()
     .unique()

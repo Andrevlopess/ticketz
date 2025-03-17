@@ -21,21 +21,27 @@ export type ProfileUpdate = z.infer<typeof ProfileUpdateSchema>;
 
 const UserInsertSchema = createInsertSchema(User, {
   email: z.string().email(),
+  password: z.string().min(8, 'Password must be at least 8 characters long.'),
 }).strict();
+
 
 const ProfileInsertSchema = createInsertSchema(Profile, {
   phone: z
     .string()
     .regex(
-      /^\+?[1-9][0-9]{7,14}$/,
+      /^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$/g,
       'Invalid phone number format. Use only numbers.',
     )
     .optional(),
-});
+  firstName: z
+    .string()
+    .min(2, 'First name must be at least 2 characters long.'),
+  lastName: z.string().min(2, 'Last name must be at least 2 characters long.'),
+}).omit({
+  userId: true
+})
 
-const RegisterSchema = UserInsertSchema.merge(ProfileInsertSchema).omit({
-  userId: true,
-});
+const RegisterSchema = UserInsertSchema.merge(ProfileInsertSchema)
 export type RegisterInsert = z.infer<typeof RegisterSchema>;
 
 @Injectable()
@@ -46,9 +52,10 @@ export class ProfilesService {
   ) {}
 
   async create(createProfileDto: ProfileInsert) {
-    const ProfileCreateSchema = createInsertSchema(Profile).strict();
+    const parsed = createInsertSchema(Profile)
+      .strict()
+      .safeParse(createProfileDto);
 
-    const parsed = ProfileCreateSchema.safeParse(createProfileDto);
 
     if (!parsed.success) {
       throw new BadRequestException(parsed.error.issues[0]?.message, {
@@ -172,6 +179,7 @@ export class ProfilesService {
   async register(registerUserDto: RegisterInsert) {
     const parsed = RegisterSchema.safeParse(registerUserDto);
 
+    // return parsed
     if (!parsed.success) {
       // return parsed.error
       throw new BadRequestException(

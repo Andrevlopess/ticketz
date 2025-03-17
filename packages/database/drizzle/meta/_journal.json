@@ -15,6 +15,27 @@
       "when": 1741898545542,
       "tag": "0001_free_tempest",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1741951921048,
+      "tag": "0002_typical_true_believers",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1741952445585,
+      "tag": "0003_natural_lady_deathstrike",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1742213457497,
+      "tag": "0004_nosy_pete_wisdom",
+      "breakpoints": true
     }
   ]
 }
