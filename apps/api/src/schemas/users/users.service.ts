@@ -7,12 +7,13 @@ import {
 } from '@nestjs/common';
 import {
   GlobalSchema,
+  MemberShip,
   Profile,
   User,
   UserInsert,
   UserSelect,
 } from '@ticketz/database';
-import { eq, getTableColumns, isNull, sql } from 'drizzle-orm';
+import { and, eq, getTableColumns, isNotNull, isNull, sql } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { createInsertSchema, createUpdateSchema } from 'drizzle-zod';
 import { DrizzleAsyncProvider } from 'src/drizzle/drizzle.provider';
@@ -25,7 +26,10 @@ const UserUpdateSchema = createUpdateSchema(User)
   .strict();
 
 export type UserUpdate = z.infer<typeof UserUpdateSchema>;
-type ValidateUser = Pick<UserSelect, 'id' | 'email' | 'password'>;
+type ValidateUser = Pick<
+  UserSelect,
+  'id' | 'email' | 'password' | 'defaultOrganizationId'
+>;
 
 @Injectable()
 export class UsersService {
@@ -94,19 +98,6 @@ export class UsersService {
     return user;
   }
 
-  async findUserByEmail(email: string): Promise<ValidateUser | undefined> {
-    const [user] = await this.db
-      .select({
-        id: User.id,
-        email: User.email,
-        password: User.password,
-      })
-      .from(User)
-      .where(eq(User.email, email));
-
-    return user;
-  }
-
   async update(id: number, updateUserDto: UserUpdate) {
     const parsed = UserUpdateSchema.safeParse(updateUserDto);
 
@@ -140,5 +131,38 @@ export class UsersService {
       .set({ deletedAt: sql`now()` })
       .where(eq(User.id, id))
       .returning();
+  }
+
+  ////
+
+  async findUserByEmail(email: string): Promise<ValidateUser | undefined> {
+    const [user] = await this.db
+      .select({
+        id: User.id,
+        email: User.email,
+        password: User.password,
+        defaultOrganizationId: User.defaultOrganizationId,
+      })
+      .from(User)
+      .where(and(eq(User.email, email), isNotNull(User.defaultOrganizationId)));
+
+    return user;
+  }
+
+  async validateMembership(userId: number, organizationId: number) {
+    const [membership] = await this.db
+      .select()
+      .from(MemberShip)
+      .where(
+        and(
+          eq(MemberShip.userId, userId),
+          eq(MemberShip.organizationId, organizationId),
+        ),
+      );
+
+
+    if (!membership) return false;
+
+    return true;
   }
 }

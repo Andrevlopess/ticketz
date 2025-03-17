@@ -1,12 +1,15 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AuthInput, AuthResponse } from '@ticketz/types';
+import { RoleEnum, Role } from '@ticketz/database';
 import bcrypt from 'bcrypt';
 import appConfig from 'src/config/app.config';
 import { UsersService } from '../schemas/users/users.service';
+import { z } from 'zod';
 
-type RefreshTokenPayload = { sub: number };
-type AccessTokenPayload = { sub: number; email: string };
+type RefreshTokenPayload = { sub: number; org: number };
+export type User = { id: string; email: string; org: number; role: Role };
+export type AccessTokenPayload = Omit<User, 'id'> & { sub: number };
 
 @Injectable()
 export class AuthService {
@@ -25,7 +28,13 @@ export class AuthService {
     return {
       sub: user.id,
       email: user.email,
+      org: user.defaultOrganizationId,
+      role: 'ADMIN'
     };
+  }
+
+  async validateMembership(userId: number, organizationId: number) {
+    return this.usersService.validateMembership(userId, organizationId);
   }
 
   async authenticate(user: AuthInput): Promise<AuthResponse> {
@@ -74,10 +83,13 @@ export class AuthService {
       const accessToken = await this._generateAccessToken({
         sub: payload.sub,
         email: payload.email,
+        org: payload.org,
+        role: 'ADMIN'
       });
 
       const refreshToken = await this._generateRefreshToken({
         sub: payload.sub,
+        org: payload.org,
       });
 
       return {

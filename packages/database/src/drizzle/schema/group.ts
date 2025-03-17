@@ -3,6 +3,7 @@ import { integer, pgTable, primaryKey, varchar } from "drizzle-orm/pg-core";
 import { timestamps } from "../columns.helpers";
 import { Ticket } from "./ticket";
 import { User } from "./user";
+import { Organization } from "./organization";
 
 export const Group = pgTable("group", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
@@ -10,12 +11,20 @@ export const Group = pgTable("group", {
 
   description: varchar(),
 
+  organizationId: integer()
+    .notNull()
+    .references(() => Organization.id),
+
   ...timestamps,
 });
 
-export const GroupRelations = relations(Group, ({ many }) => ({
+export const GroupRelations = relations(Group, ({ many, one }) => ({
   users: many(UsersOnGroup),
-  tickets: many(Ticket)
+  tickets: many(Ticket),
+  organization: one(Organization, {
+    fields: [Group.organizationId],
+    references: [Organization.id],
+  }),
 }));
 
 export const UsersOnGroup = pgTable(
@@ -38,6 +47,5 @@ export const UsersOnGroupRelations = relations(UsersOnGroup, ({ one }) => ({
   group: one(Group, { fields: [UsersOnGroup.groupId], references: [Group.id] }),
 }));
 
-
-export type GroupSelect = typeof Group.$inferSelect
-export type GroupInsert = typeof Group.$inferInsert
+export type GroupSelect = typeof Group.$inferSelect;
+export type GroupInsert = typeof Group.$inferInsert;

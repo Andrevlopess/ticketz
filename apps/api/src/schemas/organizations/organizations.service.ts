@@ -1,3 +1,4 @@
+import { AuthService } from './../../auth/auth.service';
 import {
   BadRequestException,
   Inject,
@@ -6,10 +7,12 @@ import {
 } from '@nestjs/common';
 import {
   GlobalSchema,
+  MemberShip,
   Organization,
   OrganizationInsert,
+  User,
 } from '@ticketz/database';
-import { desc, eq, isNull, sql } from 'drizzle-orm';
+import { desc, eq, isNull, sql, and, getTableColumns } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { createInsertSchema, createUpdateSchema } from 'drizzle-zod';
 import { DrizzleAsyncProvider } from 'src/drizzle/drizzle.provider';
@@ -49,19 +52,32 @@ export class OrganizationsService {
     return organization;
   }
 
-  async findAll() {
+  async findMany(userId: number) {
     return this.db
-      .select()
+      .select({
+        ...getTableColumns(Organization),
+      })
       .from(Organization)
-      .where(isNull(Organization.deletedAt))
+      .innerJoin(MemberShip, eq(MemberShip.organizationId, Organization.id))
+      .where(and(isNull(Organization.deletedAt), eq(MemberShip.userId, userId)))
       .orderBy(desc(Organization.createdAt));
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, userId: number) {
     const [organization] = await this.db
-      .select()
+      .select({
+        ...getTableColumns(Organization),
+      })
       .from(Organization)
-      .where(eq(Organization.id, id));
+      .innerJoin(MemberShip, eq(MemberShip.organizationId, Organization.id))
+      .where(
+        and(
+          isNull(Organization.deletedAt),
+          eq(MemberShip.userId, userId),
+          eq(Organization.id, id),
+        ),
+      )
+      .orderBy(desc(Organization.createdAt));
 
     if (!organization)
       throw new NotFoundException(`Organization #${id} not found!`);
@@ -69,6 +85,7 @@ export class OrganizationsService {
   }
 
   async update(id: number, updateOrganizationDto: OrganizationUpdate) {
+
     const parsed = createUpdateSchema(Organization).safeParse(
       updateOrganizationDto,
     );
@@ -76,7 +93,6 @@ export class OrganizationsService {
     if (!parsed.success) throw new ZodException(parsed.error);
 
     const [organization] = await this.db.transaction(async (trx) => {
-      
       if (updateOrganizationDto.name) {
         const [alreadyExists] = await trx
           .select()

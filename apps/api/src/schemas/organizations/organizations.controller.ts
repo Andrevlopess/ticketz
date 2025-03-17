@@ -1,10 +1,32 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Req,
+  UnauthorizedException,
+  ForbiddenException,
+  NotFoundException,
+  UseGuards,
+} from '@nestjs/common';
 import { OrganizationsService } from './organizations.service';
 import type { OrganizationInsert } from '@ticketz/database';
+import type { Request } from 'express';
+import { AuthService } from 'src/auth/auth.service';
+import { Roles } from 'src/decorators/roles.decorator';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
 
 @Controller('organizations')
+// @Roles(['admin'])
+@UseGuards(RolesGuard)
 export class OrganizationsController {
-  constructor(private readonly organizationsService: OrganizationsService) {}
+  constructor(
+    private readonly organizationsService: OrganizationsService,
+    private authService: AuthService,
+  ) {}
 
   @Post()
   create(@Body() createOrganizationDto: OrganizationInsert) {
@@ -12,22 +34,41 @@ export class OrganizationsController {
   }
 
   @Get()
-  findAll() {
-    return this.organizationsService.findAll();
+  findAll(@Req() req: Request) {
+    return this.organizationsService.findMany(req.user.sub);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.organizationsService.findOne(+id);
+  findOne(@Req() req: Request, @Param('id') id: string) {
+
+    console.log(req);
+    
+    // if (!req.user?.org) {
+    //   throw new UnauthorizedException();
+    // }
+
+    // return this.organizationsService.findOne(req.user.org);
+
+    return this.organizationsService.findOne(+id, req.user.sub);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateOrganizationDto: any) {
+  async update(
+    @Req() { user }: Request,
+    @Param('id') id: string,
+    @Body() updateOrganizationDto: any,
+  ) {
+    const isMember = await this.authService.validateMembership(user.sub, +id);
+    if (!isMember) throw new NotFoundException();
+
     return this.organizationsService.update(+id, updateOrganizationDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  remove(@Req() { user }: Request, @Param('id') id: string) {
+    const isMember = this.authService.validateMembership(user.sub, +id);
+    if (!isMember) throw new NotFoundException();
+
     return this.organizationsService.remove(+id);
   }
 }

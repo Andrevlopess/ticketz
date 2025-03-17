@@ -12,14 +12,24 @@ import { Profile } from "./profile";
 import { Ticket } from "./ticket";
 import { TicketAssignments } from "./ticket-assignment";
 import { TicketNote } from "./ticket-note";
+import { Organization } from "./organization";
+import { z } from "zod";
 
-export const roleEnum = pgEnum("role", ["MASTER", "ADMIN", "USER"]);
+export const RoleEnum = pgEnum("role", ["MASTER", "ADMIN", "USER"]);
+
+const RoleEnumSchema = z.enum(RoleEnum.enumValues);
+export type Role = z.infer<typeof RoleEnumSchema>;
+
 export const User = table("user", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   email: varchar({ length: 255 }).notNull().unique(),
 
   password: varchar(),
-  role: roleEnum().$defaultFn(() => "USER"),
+  role: RoleEnum().$defaultFn(() => "USER"),
+  defaultOrganizationId: integer()
+    .notNull()
+    .default(1)
+    .references(() => Organization.id),
 
   ...timestamps,
 });
@@ -27,11 +37,15 @@ export const User = table("user", {
 export const UserRelations = relations(User, ({ one, many }) => ({
   // profile: one(Profile),
   memberships: many(MemberShip),
-  notes: many(TicketNote, {relationName: "notesOnTicket"}),
+  notes: many(TicketNote, { relationName: "notesOnTicket" }),
   usersOnGroup: many(UsersOnGroup),
   assignees: many(TicketAssignments, { relationName: "assigneesOnTicket" }),
   assigner: many(TicketAssignments, { relationName: "assignersOnTicket" }),
   createdTickets: many(Ticket),
+  defaultOrganization: one(Organization, {
+    fields: [User.defaultOrganizationId],
+    references: [Organization.id],
+  }),
 }));
 
 export type UserSelect = typeof User.$inferSelect;

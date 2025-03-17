@@ -17,6 +17,7 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { Public } from 'src/decorators/public.decorator';
 import type { AuthInput } from '@ticketz/types';
 import type { Response, Request } from 'express';
+import { RolesGuard } from './guards/roles.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -29,6 +30,7 @@ export class AuthController {
     @Body() data: AuthInput,
     @Res({ passthrough: true }) response: Response,
   ) {
+
     const { accessToken, refreshToken } =
       await this.authService.authenticate(data);
 
@@ -45,12 +47,14 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('logout')
   logout(@Res({ passthrough: true }) res: Response) {
+
     res.clearCookie('refreshToken', {
       httpOnly: true,
       secure: true,
       sameSite: 'lax',
       path: '/',
     });
+
     return { message: 'User logged out successfully' };
   }
 
@@ -76,8 +80,12 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
+  // @UseGuards(RolesGuard)
   @Get('me')
   getUserInfo(@Req() req: Request) {
+    
+
+    // return teste
     // req.user is infered on the jwt guard.
     // req.user is the token decoded data
     return req.user

@@ -8,12 +8,14 @@ import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { IS_PUBLIC_KEY } from 'src/decorators/public.decorator';
+import { AccessTokenPayload, AuthService } from '../auth.service';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
   constructor(
     private jwtService: JwtService,
     private reflector: Reflector,
+    private authService: AuthService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -27,15 +29,17 @@ export class JwtAuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
     if (!token) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Token not provided!');
     }
 
     try {
-      const payload = await this.jwtService.verifyAsync(token);
+      const payload =
+        await this.jwtService.verifyAsync<AccessTokenPayload>(token);
 
-      request['user'] = payload;
+      //todo: set org id on another request key => request['organization'] = org;
+      request['user'] = payload as Required<AccessTokenPayload>;
     } catch {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException("Invalid token provided!");
     }
     return true;
   }

@@ -1,18 +1,26 @@
 import { relations } from "drizzle-orm";
-import { integer, primaryKey, varchar } from "drizzle-orm/pg-core";
+import { integer, pgTable, primaryKey, varchar } from "drizzle-orm/pg-core";
 import { timestamps } from "../columns.helpers";
-import { pgTable } from "drizzle-orm/pg-core";
 import { Ticket } from "./ticket";
+import { Organization } from "./organization";
 
 export const Tag = pgTable("tag", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   name: varchar().unique().notNull(),
 
+  organizationId: integer()
+    .notNull()
+    .references(() => Organization.id),
+
   ...timestamps,
 });
 
-export const TagRelations = relations(Tag, ({ many }) => ({
+export const TagRelations = relations(Tag, ({ many, one }) => ({
   tagsOnTicket: many(TagsOnTicket),
+  organization: one(Organization, {
+    fields: [Tag.organizationId],
+    references: [Organization.id],
+  }),
 }));
 
 export const TagsOnTicket = pgTable(

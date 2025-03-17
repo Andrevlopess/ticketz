@@ -10,20 +10,19 @@ import {
   Ticket,
   User,
   UserSelect,
-  UsersOnGroup,
 } from '@ticketz/database';
 import { eq, inArray, and, getTableColumns } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DrizzleAsyncProvider } from 'src/drizzle/drizzle.provider';
 
 @Injectable()
-export class GroupMembersService {
+export class OrganizationMembersService {
   constructor(
     @Inject(DrizzleAsyncProvider)
     private db: NodePgDatabase<typeof GlobalSchema>,
   ) {}
 
-  findMany(groupId: number) {
+  findMany(organizationId: number) {
 
     const { id, userId, updatedAt, createdAt, deletedAt, ...profileData } =
       getTableColumns(Profile);
@@ -34,23 +33,23 @@ export class GroupMembersService {
         name: User.email,
         ...profileData,
       })
-      .from(UsersOnGroup)
-      .innerJoin(User, eq(User.id, UsersOnGroup.userId))
+      .from(MemberShip)
+      .innerJoin(User, eq(User.id, MemberShip.userId))
       .innerJoin(Profile, eq(Profile.userId, User.id))
-      .where(eq(UsersOnGroup.groupId, groupId));
+      .where(eq(MemberShip.organizationId, organizationId));
 
     return insertedTags;
   }
 
-  add(groupId: number, users: Pick<UserSelect, 'id'>[]) {
-    const data = users.map((user) => ({ userId: user.id, groupId }));
+  add(organizationId: number, users: Pick<UserSelect, 'id'>[]) {
+    const data = users.map((user) => ({ userId: user.id, organizationId }));
 
     const insertedTags = this.db
-      .insert(UsersOnGroup)
+      .insert(MemberShip)
       .values(data)
       .onConflictDoNothing()
       .returning({
-        userId: UsersOnGroup.userId,
+        userId: MemberShip.userId,
       });
 
     return insertedTags;
@@ -72,11 +71,11 @@ export class GroupMembersService {
   //   return removedTags;
   // }
 
-  remove(groupId: number, userId: number) {
+  remove(organizationId: number, userId: number) {
     const removedMembers = this.db
-      .delete(UsersOnGroup)
+      .delete(MemberShip)
       .where(
-        and(eq(UsersOnGroup.userId, userId), eq(UsersOnGroup.groupId, groupId)),
+        and(eq(MemberShip.userId, userId), eq(MemberShip.organizationId, organizationId)),
       )
       .returning();
 

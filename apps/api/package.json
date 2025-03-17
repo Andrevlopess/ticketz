@@ -28,6 +28,7 @@
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.1",
     "@ticketz/database": "workspace:*",
+    "@ticketz/auth": "workspace:*",
     "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.7",
     "dotenv": "^16.4.7",

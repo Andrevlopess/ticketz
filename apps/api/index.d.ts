@@ -1,9 +1,12 @@
-import { UserSelect } from "@ticketz/database";
+import { UserSelect } from '@ticketz/database';
 
 declare global {
-    namespace Express {
-      interface User {
-        sub: number
-      }
+  namespace Express {
+    interface Request {
+      user: {
+        sub: number;
+        org: number;
+      };
     }
   }
+}

@@ -13,6 +13,7 @@ import { ProfilesModule } from './schemas/profiles/profiles.module';
 import { TagsModule } from './schemas/tags/tags.module';
 import { TicketsModule } from './schemas/tickets/tickets.module';
 import { UsersModule } from './schemas/users/users.module';
+import { RolesGuard } from './auth/guards/roles.guard';
 
 @Module({
   imports: [
@@ -33,6 +34,10 @@ import { UsersModule } from './schemas/users/users.module';
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
     },
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: RolesGuard,
+    // },
   ],
 })
 export class AppModule {}
