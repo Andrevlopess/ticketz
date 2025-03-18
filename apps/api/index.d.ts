@@ -1,4 +1,8 @@
-import { UserSelect } from '@ticketz/database';
+import {
+  MembershipSelect,
+  OrganizationSelect,
+  UserSelect,
+} from '@ticketz/database';
 
 declare global {
   namespace Express {
@@ -7,6 +11,11 @@ declare global {
         sub: number;
         org: number;
       };
+      getUserMembership: (orgId: number) => Promise<{
+        membership: MembershipSelect;
+        organization: OrganizationSelect;
+      }>;
+      getCurrentUserId: () => Promise<number>;
     }
   }
 }

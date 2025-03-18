@@ -1,31 +1,18 @@
 import { relations } from "drizzle-orm";
-import {
-  integer,
-  pgEnum,
-  pgTable as table,
-  varchar,
-} from "drizzle-orm/pg-core";
+import { integer, pgTable as table, varchar } from "drizzle-orm/pg-core";
 import { timestamps } from "../columns.helpers";
 import { UsersOnGroup } from "./group";
 import { MemberShip } from "./membership";
-import { Profile } from "./profile";
+import { Organization } from "./organization";
 import { Ticket } from "./ticket";
 import { TicketAssignments } from "./ticket-assignment";
 import { TicketNote } from "./ticket-note";
-import { Organization } from "./organization";
-import { z } from "zod";
-
-export const RoleEnum = pgEnum("role", ["MASTER", "ADMIN", "USER"]);
-
-const RoleEnumSchema = z.enum(RoleEnum.enumValues);
-export type Role = z.infer<typeof RoleEnumSchema>;
 
 export const User = table("user", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   email: varchar({ length: 255 }).notNull().unique(),
 
   password: varchar(),
-  role: RoleEnum().$defaultFn(() => "USER"),
   defaultOrganizationId: integer()
     .notNull()
     .default(1)

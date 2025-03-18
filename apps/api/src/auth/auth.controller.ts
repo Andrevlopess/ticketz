@@ -19,6 +19,7 @@ import type { AuthInput } from '@ticketz/types';
 import type { Response, Request } from 'express';
 import { RolesGuard } from './guards/roles.guard';
 
+
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -83,8 +84,8 @@ export class AuthController {
   // @UseGuards(RolesGuard)
   @Get('me')
   getUserInfo(@Req() req: Request) {
-    
 
+    // return ability.can('read', 'Post')
     // return teste
     // req.user is infered on the jwt guard.
     // req.user is the token decoded data

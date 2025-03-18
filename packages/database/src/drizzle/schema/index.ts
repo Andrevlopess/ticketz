@@ -1,6 +1,6 @@
+export * from "./role";
 export * from "./category";
 export * from "./group";
-export * from "./membership";
 export * from "./organization";
 export * from "./priority";
 export * from "./profile";
@@ -10,4 +10,4 @@ export * from "./ticket";
 export * from "./ticket-assignment";
 export * from "./ticket-note";
 export * from "./user";
-
+export * from "./membership";

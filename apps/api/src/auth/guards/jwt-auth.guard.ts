@@ -36,12 +36,23 @@ export class JwtAuthGuard implements CanActivate {
       const payload =
         await this.jwtService.verifyAsync<AccessTokenPayload>(token);
 
-      //todo: set org id on another request key => request['organization'] = org;
+      //doto: set org id on another request key => request['organization'] = org;
       request['user'] = payload as Required<AccessTokenPayload>;
     } catch {
       throw new UnauthorizedException("Invalid token provided!");
     }
-    return true;
+return true
+
+    // request.getCurrentUserId = async () => {
+    //   try {
+    //     const { sub } = await request.jwtVerify<{ sub: string }>()
+
+    //     return sub
+    //   } catch {
+    //     throw new UnauthorizedError('Invalid token')
+    //   }
+    // }
+
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {

@@ -1,8 +1,10 @@
+
 import { relations } from "drizzle-orm";
 import { integer, primaryKey, pgTable as table } from "drizzle-orm/pg-core";
 import { timestamps } from "../columns.helpers";
 import { Organization } from "./organization";
 import { User } from "./user";
+import { RoleEnum } from "./role";
 
 // todo: add a invitedBy column to save who added someone to a organization
 export const MemberShip = table(
@@ -14,6 +16,8 @@ export const MemberShip = table(
     organizationId: integer()
       .notNull()
       .references(() => Organization.id),
+
+    role: RoleEnum().notNull().default('USER'),
     ...timestamps,
   },
   (t) => [primaryKey({ columns: [t.organizationId, t.userId] })]
@@ -27,3 +31,6 @@ export const MemberShipRelations = relations(MemberShip, ({ one }) => ({
   }),
 }));
 
+
+export type MembershipSelect = typeof MemberShip.$inferSelect;
+export type MembershipInser = typeof MemberShip.$inferInsert;

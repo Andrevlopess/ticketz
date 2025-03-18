@@ -57,6 +57,20 @@
       "when": 1742226268012,
       "tag": "0007_default_org_id_on_user",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1742310971639,
+      "tag": "0008_sad_human_robot",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1742311300288,
+      "tag": "0009_remove_role_from_user_table",
+      "breakpoints": true
     }
   ]
 }

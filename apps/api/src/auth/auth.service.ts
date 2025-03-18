@@ -33,8 +33,8 @@ export class AuthService {
     };
   }
 
-  async validateMembership(userId: number, organizationId: number) {
-    return this.usersService.validateMembership(userId, organizationId);
+  async getMembership(userId: number, organizationId: number) {
+    return this.usersService.getMembership(userId, organizationId);
   }
 
   async authenticate(user: AuthInput): Promise<AuthResponse> {

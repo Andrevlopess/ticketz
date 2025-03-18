@@ -8,6 +8,7 @@ import {
 import {
   GlobalSchema,
   MemberShip,
+  Organization,
   Profile,
   User,
   UserInsert,
@@ -149,10 +150,11 @@ export class UsersService {
     return user;
   }
 
-  async validateMembership(userId: number, organizationId: number) {
+  async getMembership(userId: number, organizationId: number) {
     const [membership] = await this.db
       .select()
       .from(MemberShip)
+      .innerJoin(Organization, eq(MemberShip.organizationId, Organization.id))
       .where(
         and(
           eq(MemberShip.userId, userId),
@@ -160,9 +162,6 @@ export class UsersService {
         ),
       );
 
-
-    if (!membership) return false;
-
-    return true;
+    return membership;
   }
 }
