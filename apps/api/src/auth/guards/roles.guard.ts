@@ -1,40 +1,39 @@
-import {
-  Injectable,
-  CanActivate,
-  ExecutionContext,
-  ForbiddenException,
-} from '@nestjs/common';
+import { UsersService } from './../../schemas/users/users.service';
+
+import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { Observable } from 'rxjs';
-import { IS_PUBLIC_KEY } from 'src/decorators/public.decorator';
-import { Roles } from 'src/decorators/roles.decorator';
+import { Role } from '@ticketz/database';
+import { ROLES_KEY } from 'src/decorators/roles.decorator';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
-  constructor(private reflector: Reflector) {}
+  constructor(
+    private reflector: Reflector,
+    private readonly usersService: UsersService,
+  ) {}
 
-  canActivate(
-    context: ExecutionContext,
-  ): boolean | Promise<boolean> | Observable<boolean> {
-    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const requiredRoles = this.reflector.getAllAndOverride<Role[]>(ROLES_KEY, [
       context.getHandler(),
       context.getClass(),
     ]);
 
-    if (isPublic) return true;
+    if (!requiredRoles) {
+      return true;
+    }
 
-    const roles = this.reflector.get<string[]>(Roles, context.getHandler());
+    const { user } = context.switchToHttp().getRequest();
 
-    // if(!roles) return true
+    const membership = await this.usersService.getMembership(
+      user.sub,
+      user.orgId,
+    );
 
-    const request = context.switchToHttp().getRequest();
-    const user = request.user;
+    if (!membership || membership.role !== user.role) {
+      return false;
+    }
 
-    console.log(user.org, roles);
-    if (user.org === 2) return true;
-
-    return false;
-    // throw new ForbiddenException()
-    return false;
+    return requiredRoles.some((role) => user.role?.includes(role));
   }
 }
+// TODO: how to update the jwt on the client if a user changes their role?

@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import type { GroupInsert } from '@ticketz/database';
 import { GroupsService } from './groups.service';
+import { Roles } from 'src/decorators/roles.decorator';
 
 @Controller('groups')
 export class GroupsController {
@@ -17,6 +18,7 @@ export class GroupsController {
   ) {}
 
   @Post()
+  @Roles('ADMIN')
   create(@Body() createGroupDto: GroupInsert) {
     return this.groupsService.create(createGroupDto);
   }
@@ -27,6 +29,7 @@ export class GroupsController {
   }
 
   @Get(':id')
+  @Roles('ADMIN')
   findOne(@Param('id') id: string) {
     return this.groupsService.findOne(+id);
   }

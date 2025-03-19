@@ -1,4 +1,4 @@
-import { defineAbilityFor, userSchema } from '@ticketz/auth';
+import { defineAbilityFor } from '@ticketz/auth';
 import { Role } from '@ticketz/database';
 
 export function getUserPermissions(userId: number, role: Role) {

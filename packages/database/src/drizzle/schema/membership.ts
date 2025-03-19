@@ -17,7 +17,7 @@ export const MemberShip = table(
       .notNull()
       .references(() => Organization.id),
 
-    role: RoleEnum().notNull().default('USER'),
+    role: RoleEnum().notNull().default('MEMBER'),
     ...timestamps,
   },
   (t) => [primaryKey({ columns: [t.organizationId, t.userId] })]

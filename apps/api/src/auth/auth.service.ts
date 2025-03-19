@@ -1,14 +1,15 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AuthInput, AuthResponse } from '@ticketz/types';
-import { RoleEnum, Role } from '@ticketz/database';
+// import { RoleEnum, Role } from '@ticketz/database';
 import bcrypt from 'bcrypt';
 import appConfig from 'src/config/app.config';
 import { UsersService } from '../schemas/users/users.service';
 import { z } from 'zod';
+import { Role } from '@ticketz/database';
 
-type RefreshTokenPayload = { sub: number; org: number };
-export type User = { id: string; email: string; org: number; role: Role };
+type RefreshTokenPayload = { sub: number; orgId: number };
+export type User = { id: string; email: string; orgId: number; role: Role };
 export type AccessTokenPayload = Omit<User, 'id'> & { sub: number };
 
 @Injectable()
@@ -28,8 +29,8 @@ export class AuthService {
     return {
       sub: user.id,
       email: user.email,
-      org: user.defaultOrganizationId,
-      role: 'ADMIN'
+      orgId: user.defaultOrganizationId,
+      role: user.role,
     };
   }
 
@@ -66,7 +67,7 @@ export class AuthService {
       { sub: payload.sub },
       {
         secret: appConfig().jwtRefreshSecret,
-        expiresIn: '1d',
+        expiresIn: '30d',
       },
     );
   }
@@ -83,13 +84,13 @@ export class AuthService {
       const accessToken = await this._generateAccessToken({
         sub: payload.sub,
         email: payload.email,
-        org: payload.org,
-        role: 'ADMIN'
+        orgId: payload.orgId,
+        role: payload.role,
       });
 
       const refreshToken = await this._generateRefreshToken({
         sub: payload.sub,
-        org: payload.org,
+        orgId: payload.orgId,
       });
 
       return {

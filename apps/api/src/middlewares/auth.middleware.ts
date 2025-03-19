@@ -32,23 +32,23 @@ export class AuthMiddleware implements NestMiddleware {
       }
     };
 
-    req.getUserMembership = async (id: number) => {
-      const userId = await req.getCurrentUserId();
+    // req.getUserMembership = async (id: number) => {
+    //   const userId = await req.getCurrentUserId();
 
-      const member = await this.authService.getMembership(userId, id);
+    //   const member = await this.authService.getMembership(userId, id);
 
-      if (!member) {
-        throw new UnauthorizedException(
-          `You're not a member of this organization.`,
-        );
-      }
-      const { organization, membership } = member;
+    //   if (!member) {
+    //     throw new UnauthorizedException(
+    //       `You're not a member of this organization.`,
+    //     );
+    //   }
+    //   const { organization, membership } = member;
 
-      return {
-        organization,
-        membership,
-      };
-    };
+    //   return {
+    //     organization,
+    //     membership,
+    //   };
+    // };
 
     next();
   }

@@ -71,6 +71,13 @@
       "when": 1742311300288,
       "tag": "0009_remove_role_from_user_table",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1742415728192,
+      "tag": "0010_organic_whiplash",
+      "breakpoints": true
     }
   ]
 }

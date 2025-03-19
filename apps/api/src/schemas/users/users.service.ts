@@ -2,17 +2,17 @@ import {
   BadRequestException,
   Inject,
   Injectable,
-  InternalServerErrorException,
-  NotFoundException,
+  NotFoundException
 } from '@nestjs/common';
 import {
   GlobalSchema,
   MemberShip,
+  MembershipSelect,
   Organization,
-  Profile,
+  Role,
   User,
   UserInsert,
-  UserSelect,
+  UserSelect
 } from '@ticketz/database';
 import { and, eq, getTableColumns, isNotNull, isNull, sql } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
@@ -30,7 +30,7 @@ export type UserUpdate = z.infer<typeof UserUpdateSchema>;
 type ValidateUser = Pick<
   UserSelect,
   'id' | 'email' | 'password' | 'defaultOrganizationId'
->;
+> & { role: Role };
 
 @Injectable()
 export class UsersService {
@@ -143,16 +143,29 @@ export class UsersService {
         email: User.email,
         password: User.password,
         defaultOrganizationId: User.defaultOrganizationId,
+        role: MemberShip.role,
       })
       .from(User)
+      .innerJoin(
+        MemberShip,
+        and(
+          eq(MemberShip.userId, User.id),
+          eq(MemberShip.organizationId, User.defaultOrganizationId),
+        ),
+      )
       .where(and(eq(User.email, email), isNotNull(User.defaultOrganizationId)));
 
     return user;
   }
 
-  async getMembership(userId: number, organizationId: number) {
+  async getMembership(
+    userId: number,
+    organizationId: number,
+  ): Promise<MembershipSelect | undefined> {
     const [membership] = await this.db
-      .select()
+      .select({
+        ...getTableColumns(MemberShip),
+      })
       .from(MemberShip)
       .innerJoin(Organization, eq(MemberShip.organizationId, Organization.id))
       .where(
