@@ -1,0 +1,14 @@
+{
+    "extends": "@ticketz/typescript-config/base.json",
+    "compilerOptions": {
+        "outDir": "dist",
+        "strict": false
+    },
+    "include": [
+        "src/**/*"
+    ],
+    "exclude": [
+        "node_modules",
+        "dist"
+    ]
+}
