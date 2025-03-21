@@ -11,6 +11,7 @@ import {
   Organization,
   OrganizationInsert,
   User,
+  Tenant
 } from '@ticketz/database';
 import { desc, eq, isNull, sql, and, getTableColumns } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
@@ -64,6 +65,17 @@ export class OrganizationsService {
   }
 
   async findOne(id: number, userId: number) {
+
+    // const [organization] = await this.db
+    //   .select()
+    //   .from(Organization)
+    //   .where(
+    //     and(
+    //       isNull(Organization.deletedAt),
+    //       eq(Organization.id, id),
+    //     ),
+    //   )
+    //   .orderBy(desc(Organization.createdAt));
     const [organization] = await this.db
       .select({
         ...getTableColumns(Organization),
@@ -74,10 +86,9 @@ export class OrganizationsService {
         and(
           isNull(Organization.deletedAt),
           eq(MemberShip.userId, userId),
-          eq(Organization.id, id),
+          eq(MemberShip.organizationId, id),
         ),
       )
-      .orderBy(desc(Organization.createdAt));
 
     if (!organization)
       throw new NotFoundException(`Organization #${id} not found!`);

@@ -20,7 +20,7 @@ export class AuthService {
   ) {}
 
   async validateUser(data: AuthInput): Promise<AccessTokenPayload | null> {
-    const user = await this.usersService.findUserByEmail(data.email);
+    const user = await this.usersService.findUserByEmail(data.email);    
     if (!user) return null;
 
     const validPassword = await bcrypt.compare(data.password, user.password);

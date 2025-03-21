@@ -1,60 +1,44 @@
-import {
-  Injectable,
-  NestMiddleware,
-  UnauthorizedException,
-} from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { NextFunction, Request, Response } from 'express';
-import { AccessTokenPayload, AuthService } from 'src/auth/auth.service';
+// import {
+//   Injectable,
+//   NestMiddleware,
+//   UnauthorizedException,
+// } from '@nestjs/common';
+// import { JwtService } from '@nestjs/jwt';
+// import { NextFunction, Request, Response } from 'express';
+// import { AccessTokenPayload, AuthService } from 'src/auth/auth.service';
 
-@Injectable()
-export class AuthMiddleware implements NestMiddleware {
-  constructor(
-    private readonly authService: AuthService,
-    private jwtService: JwtService,
-  ) {}
+// @Injectable()
+// export class AuthMiddleware implements NestMiddleware {
+//   constructor(
+//     private readonly authService: AuthService,
+//     private jwtService: JwtService,
+//   ) {}
 
-  use(req: Request, res: Response, next: NextFunction) {
-    req.getCurrentUserId = async () => {
-      const token = this.extractTokenFromHeader(req);
+//   use(req: Request, res: Response, next: NextFunction) {
 
-      if (!token) {
-        throw new UnauthorizedException('Token not provided!');
-      }
+//     // req.getUserMembership = async (id: number) => {
+//     //   const userId = await req.getCurrentUserId();
 
-      try {
-        const { sub } =
-          await this.jwtService.verifyAsync<AccessTokenPayload>(token);
+//     //   const member = await this.authService.getMembership(userId, id);
 
-        return sub;
-      } catch {
-        throw new UnauthorizedException('Invalid token provided!');
-      }
-    };
+//     //   if (!member) {
+//     //     throw new UnauthorizedException(
+//     //       `You're not a member of this organization.`,
+//     //     );
+//     //   }
+//     //   const { organization, membership } = member;
 
-    // req.getUserMembership = async (id: number) => {
-    //   const userId = await req.getCurrentUserId();
+//     //   return {
+//     //     organization,
+//     //     membership,
+//     //   };
+//     // };
 
-    //   const member = await this.authService.getMembership(userId, id);
+//     next();
+//   }
 
-    //   if (!member) {
-    //     throw new UnauthorizedException(
-    //       `You're not a member of this organization.`,
-    //     );
-    //   }
-    //   const { organization, membership } = member;
-
-    //   return {
-    //     organization,
-    //     membership,
-    //   };
-    // };
-
-    next();
-  }
-
-  private extractTokenFromHeader(request: Request): string | undefined {
-    const [type, token] = request.headers.authorization?.split(' ') ?? [];
-    return type === 'Bearer' ? token : undefined;
-  }
-}
+//   private extractTokenFromHeader(request: Request): string | undefined {
+//     const [type, token] = request.headers.authorization?.split(' ') ?? [];
+//     return type === 'Bearer' ? token : undefined;
+//   }
+// }

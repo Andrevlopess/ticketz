@@ -9,7 +9,7 @@ declare global {
     interface Request {
       user: {
         sub: number;
-        org: number;
+        orgId: number;
       };
       getUserMembership: (orgId: number) => Promise<{
         membership: MembershipSelect;

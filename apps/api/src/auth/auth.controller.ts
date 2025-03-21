@@ -14,8 +14,6 @@ import type { Request, Response } from 'express';
 import { Public } from 'src/decorators/public.decorator';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { Actions, defineAbilityFor } from '@ticketz/auth';
-import { getUserPermissions } from 'src/utils/get-user-permissions';
 import { Roles } from 'src/decorators/roles.decorator';
 
 @Controller('auth')
@@ -42,7 +40,7 @@ export class AuthController {
     return { accessToken };
   }
 
-  @HttpCode(HttpStatus.OK)
+  @HttpCode(HttpStatus.NO_CONTENT)
   @Post('logout')
   logout(@Res({ passthrough: true }) res: Response) {
     res.clearCookie('refreshToken', {
@@ -52,7 +50,7 @@ export class AuthController {
       path: '/',
     });
 
-    return { message: 'User logged out successfully' };
+    return;
   }
 
   @Public()
@@ -77,9 +75,9 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Roles('ADMIN')
   @Get('me')
   getUserInfo(@Req() req: Request) {
-
     // return ability.can('read', 'Post')
     // return teste
     // req.user is infered on the jwt guard.

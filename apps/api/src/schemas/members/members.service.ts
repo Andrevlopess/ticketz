@@ -16,7 +16,7 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DrizzleAsyncProvider } from 'src/drizzle/drizzle.provider';
 
 @Injectable()
-export class OrganizationMembersService {
+export class MembersService {
   constructor(
     @Inject(DrizzleAsyncProvider)
     private db: NodePgDatabase<typeof GlobalSchema>,

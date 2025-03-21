@@ -6,23 +6,21 @@ import {
   Param,
   ParseIntPipe,
   Post,
-  Req,
-  UnauthorizedException,
+  Req
 } from '@nestjs/common';
 import { UserSelect } from '@ticketz/database';
-import { OrganizationMembersService } from './organization-members.service';
 import type { Request } from 'express';
+import { MembersService } from './members.service';
 
-@Controller('organizations/:id/members')
-export class OrganizationMembersController {
+@Controller('members')
+export class MembersController {
   constructor(
-    private readonly organizationMembersService: OrganizationMembersService,
+    private readonly MembersService: MembersService,
   ) {}
 
   @Get()
   findMany(@Req() req: Request) {
-
-    return this.organizationMembersService.findMany(req.user.org);
+    return this.MembersService.findMany(req.user.orgId);
   }
 
   @Post()
@@ -30,12 +28,12 @@ export class OrganizationMembersController {
     @Param('id', ParseIntPipe) id: number,
     @Body() users: Pick<UserSelect, 'id'>[],
   ) {
-    return this.organizationMembersService.add(id, users);
+    return this.MembersService.add(id, users);
   }
 
   // @Patch()
   // bulkRemove(@Param('id', ParseIntPipe) id: number, @Body() tags: TagSelect[]) {
-  //   return this.organizationMembersService.bulkRemove(id, tags);
+  //   return this.MembersService.bulkRemove(id, tags);
   // }
 
   @Delete(':userId')
@@ -43,6 +41,6 @@ export class OrganizationMembersController {
     @Param('id', ParseIntPipe) id: number,
     @Param('userId', ParseIntPipe) userId: number,
   ) {
-    return this.organizationMembersService.remove(id, userId);
+    return this.MembersService.remove(id, userId);
   }
 }
