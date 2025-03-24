@@ -11,3 +11,4 @@ export * from "./ticket-assignment";
 export * from "./ticket-note";
 export * from "./user";
 export * from "./membership";
+export * from "./tenant";

@@ -66,16 +66,6 @@ export class OrganizationsService {
 
   async findOne(id: number, userId: number) {
 
-    // const [organization] = await this.db
-    //   .select()
-    //   .from(Organization)
-    //   .where(
-    //     and(
-    //       isNull(Organization.deletedAt),
-    //       eq(Organization.id, id),
-    //     ),
-    //   )
-    //   .orderBy(desc(Organization.createdAt));
     const [organization] = await this.db
       .select({
         ...getTableColumns(Organization),

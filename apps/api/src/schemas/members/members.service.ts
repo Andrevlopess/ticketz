@@ -1,17 +1,12 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import {
   GlobalSchema,
   MemberShip,
   Profile,
-  Tag,
-  TagInsert,
-  TagSelect,
-  TagsOnTicket,
-  Ticket,
   User,
-  UserSelect,
+  UserSelect
 } from '@ticketz/database';
-import { eq, inArray, and, getTableColumns } from 'drizzle-orm';
+import { and, eq, getTableColumns } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DrizzleAsyncProvider } from 'src/drizzle/drizzle.provider';
 
@@ -23,7 +18,6 @@ export class MembersService {
   ) {}
 
   findMany(organizationId: number) {
-
     const { id, userId, updatedAt, createdAt, deletedAt, ...profileData } =
       getTableColumns(Profile);
 
@@ -34,7 +28,7 @@ export class MembersService {
         ...profileData,
       })
       .from(MemberShip)
-      .innerJoin(User, eq(User.id, MemberShip.userId))
+      .innerJoin(User, and(eq(User.id, MemberShip.userId)))
       .innerJoin(Profile, eq(Profile.userId, User.id))
       .where(eq(MemberShip.organizationId, organizationId));
 
@@ -55,27 +49,44 @@ export class MembersService {
     return insertedTags;
   }
 
-  // bulkRemove(ticketId: number, tags: TagSelect[]) {
-  //   const tagsIds = tags.map((tag) => tag.id);
+  async findOne(userId: number, organizationId: number) {
+    const {
+      id,
+      userId: profileUserId,
+      updatedAt,
+      createdAt,
+      deletedAt,
+      ...profileData
+    } = getTableColumns(Profile);
 
-  //   const removedTags = this.db
-  //     .delete(TagsOnTicket)
-  //     .where(
-  //       and(
-  //         inArray(TagsOnTicket.tagId, tagsIds),
-  //         eq(TagsOnTicket.ticketId, ticketId),
-  //       ),
-  //     )
-  //     .returning();
+    const [user] = await this.db
+      .select({
+        id: User.id,
+        name: User.email,
+        ...profileData,
+      })
+      .from(MemberShip)
+      .innerJoin(User, and(eq(User.id, MemberShip.userId)))
+      .innerJoin(Profile, eq(Profile.userId, User.id))
+      .where(
+        and(
+          eq(MemberShip.organizationId, organizationId),
+          eq(MemberShip.userId, userId),
+        ),
+      );
 
-  //   return removedTags;
-  // }
+    if (!user) throw new NotFoundException(`User #${userId} not found!`);
+    return user;
+  }
 
   remove(organizationId: number, userId: number) {
     const removedMembers = this.db
       .delete(MemberShip)
       .where(
-        and(eq(MemberShip.userId, userId), eq(MemberShip.organizationId, organizationId)),
+        and(
+          eq(MemberShip.userId, userId),
+          eq(MemberShip.organizationId, organizationId),
+        ),
       )
       .returning();
 

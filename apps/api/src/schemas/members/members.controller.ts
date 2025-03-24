@@ -23,6 +23,15 @@ export class MembersController {
     return this.MembersService.findMany(req.user.orgId);
   }
 
+  @Get(':id')
+  findOne(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: Request,
+  ) {
+    return this.MembersService.findOne(id, req.user.orgId);
+  }
+
+
   @Post()
   addMember(
     @Param('id', ParseIntPipe) id: number,

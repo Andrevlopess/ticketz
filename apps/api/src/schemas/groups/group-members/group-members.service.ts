@@ -1,6 +1,7 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import {
   GlobalSchema,
+  Group,
   MemberShip,
   Profile,
   Tag,
@@ -12,7 +13,7 @@ import {
   UserSelect,
   UsersOnGroup,
 } from '@ticketz/database';
-import { eq, inArray, and, getTableColumns } from 'drizzle-orm';
+import { eq, inArray, and, getTableColumns, notInArray } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DrizzleAsyncProvider } from 'src/drizzle/drizzle.provider';
 
@@ -24,7 +25,6 @@ export class GroupMembersService {
   ) {}
 
   findMany(groupId: number) {
-
     const { id, userId, updatedAt, createdAt, deletedAt, ...profileData } =
       getTableColumns(Profile);
 
@@ -45,6 +45,25 @@ export class GroupMembersService {
   add(groupId: number, users: Pick<UserSelect, 'id'>[]) {
     const data = users.map((user) => ({ userId: user.id, groupId }));
 
+    // const isMemberOfCompany = this.db
+    //   .select()
+    //   .from(MemberShip)
+    //   .innerJoin(Group, eq(Group.id, groupId))
+    //   .where(
+    //     and(
+    //       notInArray(
+    //         MemberShip.userId,
+    //         users.map(({ id }) => id),
+    //       ),
+    //       eq(MemberShip.organizationId, groupId),
+    //     ),
+    //   );
+
+    // if (!isMemberOfCompany)
+    //   throw new BadRequestException(
+    //     'User must be a member of the company to be assigned to this group.',
+    //   );
+
     const insertedTags = this.db
       .insert(UsersOnGroup)
       .values(data)
@@ -54,6 +73,8 @@ export class GroupMembersService {
       });
 
     return insertedTags;
+
+    // a user must be of the company to be assigned to a group of this same company
   }
 
   // bulkRemove(ticketId: number, tags: TagSelect[]) {
