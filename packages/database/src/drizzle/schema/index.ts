@@ -12,3 +12,5 @@ export * from "./ticket-note";
 export * from "./user";
 export * from "./membership";
 export * from "./tenant";
+export * from "./group-membership";
+export * from "./group-role";

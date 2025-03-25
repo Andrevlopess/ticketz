@@ -1,19 +1,22 @@
 import { relations } from "drizzle-orm";
-import { integer, pgTable, varchar } from "drizzle-orm/pg-core";
-import { timestamps } from "../columns.helpers";
-import { Ticket } from "./ticket";
+import { integer, pgTable, timestamp, varchar } from "drizzle-orm/pg-core";
 import { Organization } from "./organization";
+import { Ticket } from "./ticket";
+import { primaryKey } from "drizzle-orm/pg-core";
 
-export const Priority = pgTable("priority", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  name: varchar().unique().notNull(),
+export const Priority = pgTable(
+  "priority",
+  {
+    id: integer().primaryKey().generatedAlwaysAsIdentity(),
+    name: varchar().notNull(),
 
-  organizationId: integer()
-    .notNull()
-    .references(() => Organization.id),
+    organizationId: integer()
+      .notNull()
+      .references(() => Organization.id),
 
-  ...timestamps,
-});
+    createdAt: timestamp().defaultNow().notNull(),
+  }
+);
 
 export const PriorityRelations = relations(Priority, ({ many, one }) => ({
   tickets: many(Ticket),

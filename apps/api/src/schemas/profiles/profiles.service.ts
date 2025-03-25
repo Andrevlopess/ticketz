@@ -92,7 +92,6 @@ export class ProfilesService {
       })
       .from(Profile)
       .innerJoin(User, eq(User.id, Profile.userId))
-      .where(isNull(Profile.deletedAt));
 
     if (!profiles) return 'user not found';
 
@@ -108,7 +107,7 @@ export class ProfilesService {
       })
       .from(Profile)
       .innerJoin(User, eq(User.id, Profile.userId))
-      .where(and(isNull(Profile.deletedAt), eq(Profile.id, id)));
+      .where(eq(Profile.id, id));
 
     if (!profile) {
       throw new NotFoundException('Profile not found', {
@@ -145,10 +144,7 @@ export class ProfilesService {
 
     const [updatedProfile] = await this.db
       .update(Profile)
-      .set({
-        ...updateUserDto,
-        updatedAt: sql`now()`,
-      })
+      .set(updateUserDto)
       .where(eq(Profile.id, id))
       .returning();
 
@@ -168,8 +164,7 @@ export class ProfilesService {
     }
 
     const [deletedProfile] = await this.db
-      .update(Profile)
-      .set({ deletedAt: sql`now()` })
+      .delete(Profile) 
       .where(eq(Profile.id, id))
       .returning();
 

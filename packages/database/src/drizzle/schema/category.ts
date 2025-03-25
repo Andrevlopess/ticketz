@@ -1,20 +1,24 @@
 import { relations } from "drizzle-orm";
-import { integer, pgTable, varchar } from "drizzle-orm/pg-core";
-import { timestamps } from "../columns.helpers";
+import { integer, pgTable, varchar, timestamp } from "drizzle-orm/pg-core";
 import { Ticket } from "./ticket";
 import { Organization } from "./organization";
+import { primaryKey } from "drizzle-orm/pg-core";
+import { unique } from "drizzle-orm/singlestore-core";
 
-export const Category = pgTable("category", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  name: varchar().unique().notNull(),
-  description: varchar(),
+export const Category = pgTable(
+  "category",
+  {
+    id: integer().primaryKey().generatedAlwaysAsIdentity(),
+    name: varchar().notNull(),
+    description: varchar(),
 
-  organizationId: integer()
-    .notNull()
-    .references(() => Organization.id),
+    organizationId: integer()
+      .notNull()
+      .references(() => Organization.id),
 
-  ...timestamps,
-});
+    createdAt: timestamp().defaultNow().notNull(),
+  }
+);
 
 export const CategoryRelations = relations(Category, ({ many, one }) => ({
   tickets: many(Ticket),

@@ -3,11 +3,13 @@ import {
   Inject,
   Injectable,
   NotFoundException,
+  Scope,
 } from '@nestjs/common';
-import { GlobalSchema, Group, GroupInsert } from '@ticketz/database';
+import { GlobalSchema, Group, GroupInsert, GroupMembership } from '@ticketz/database';
 import { and, desc, eq, getTableColumns, isNull, sql } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { createInsertSchema, createUpdateSchema } from 'drizzle-zod';
+import type { Request } from 'express';
 import { DrizzleAsyncProvider } from 'src/drizzle/drizzle.provider';
 import { ZodException } from 'src/handlers/zod.exception';
 import z from 'zod';
@@ -28,11 +30,18 @@ export class GroupsService {
 
     if (!parsed.success) throw new ZodException(parsed.error);
 
+
+
     const [group] = await this.db.transaction(async (trx) => {
       const [alreadyExists] = await trx
         .select()
         .from(Group)
-        .where(eq(Group.name, createGroupDto.name));
+        .where(
+          and(
+            eq(Group.name, createGroupDto.name),
+            eq(Group.organizationId, createGroupDto.organizationId),
+          ),
+        );
 
       if (alreadyExists)
         throw new BadRequestException(
@@ -45,22 +54,22 @@ export class GroupsService {
     return group;
   }
 
-  async findAll() {
+  async findAll(orgId: number) {
     return this.db
       .select()
       .from(Group)
-      .where(isNull(Group.deletedAt))
+      .where(eq(Group.organizationId, orgId))
       .orderBy(desc(Group.createdAt));
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, orgId: number) {
     const [group] = await this.db
       .select()
       .from(Group)
-      .where(and(eq(Group.id, id), isNull(Group.deletedAt)));
+      .where(and(eq(Group.organizationId, orgId), eq(Group.id, id)));
 
     if (!group) throw new NotFoundException(`Group #${id} not found!`);
-    
+
     return group;
   }
 
@@ -98,7 +107,7 @@ export class GroupsService {
       // update group
       return trx
         .update(Group)
-        .set({ ...updateGroupDto, updatedAt: sql`now()` })
+        .set(updateGroupDto)
         .where(eq(Group.id, id))
         .returning();
     });
@@ -120,8 +129,7 @@ export class GroupsService {
 
     const [deletedGroup] = await this.db
       // .delete(Group)
-      .update(Group)
-      .set({ deletedAt: sql`now()` })
+      .delete(Group)
       .where(eq(Group.id, id))
       .returning();
 

@@ -1,6 +1,6 @@
 import { relations } from "drizzle-orm";
 import { integer, pgTable as table, varchar } from "drizzle-orm/pg-core";
-import { timestamps } from "../columns.helpers";
+import { softDeleteTimestamps } from "../columns.helpers";
 import { Category } from "./category";
 import { Group } from "./group";
 import { Organization } from "./organization";
@@ -40,7 +40,7 @@ export const Ticket = table("ticket", {
     // .notNull()
     .references(() => Category.id),
 
-  ...timestamps,
+  ...softDeleteTimestamps,
 });
 
 export const TicketRelations = relations(Ticket, ({ one, many }) => ({

@@ -1,6 +1,6 @@
 import { relations } from "drizzle-orm";
 import { integer, pgEnum, pgTable as table, varchar } from "drizzle-orm/pg-core";
-import { timestamps } from "../columns.helpers";
+import { softDeleteTimestamps } from "../columns.helpers";
 import { Ticket } from "./ticket";
 import { User } from "./user";
 
@@ -15,7 +15,7 @@ export const TicketNote = table("ticketNotes", {
   ticketId: integer().notNull().references(() => Ticket.id),
   creatorId: integer().notNull().references(() => User.id),
 
-  ...timestamps,
+  ...softDeleteTimestamps,
 });
 
 export const TicketNotesRelations = relations(TicketNote, ({ one }) => ({

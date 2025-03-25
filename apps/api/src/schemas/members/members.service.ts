@@ -4,7 +4,7 @@ import {
   MemberShip,
   Profile,
   User,
-  UserSelect
+  UserSelect,
 } from '@ticketz/database';
 import { and, eq, getTableColumns } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
@@ -18,8 +18,7 @@ export class MembersService {
   ) {}
 
   findMany(organizationId: number) {
-    const { id, userId, updatedAt, createdAt, deletedAt, ...profileData } =
-      getTableColumns(Profile);
+    const { id, userId, createdAt, ...profileData } = getTableColumns(Profile);
 
     const insertedTags = this.db
       .select({
@@ -53,9 +52,9 @@ export class MembersService {
     const {
       id,
       userId: profileUserId,
-      updatedAt,
+
       createdAt,
-      deletedAt,
+
       ...profileData
     } = getTableColumns(Profile);
 

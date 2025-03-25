@@ -54,7 +54,7 @@ export class AuthController {
   }
 
   @Public()
-  @Post('refresh_token')
+  @Post('refresh')
   async refresh(
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
@@ -75,7 +75,7 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Roles('ADMIN')
+  // @Roles('ADMIN')
   @Get('me')
   getUserInfo(@Req() req: Request) {
     // return ability.can('read', 'Post')

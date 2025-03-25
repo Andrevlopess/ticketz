@@ -75,8 +75,22 @@
     {
       "idx": 10,
       "version": "7",
-      "when": 1742415728192,
-      "tag": "0010_organic_whiplash",
+      "when": 1742915664290,
+      "tag": "0010_removing_soft_delete",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1742918445106,
+      "tag": "0011_composite_primary_key_for_org",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1742932555194,
+      "tag": "0012_create_group_membership_table",
       "breakpoints": true
     }
   ]

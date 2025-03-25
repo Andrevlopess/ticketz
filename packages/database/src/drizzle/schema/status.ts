@@ -1,19 +1,19 @@
 import { relations } from "drizzle-orm";
-import { integer, pgTable, varchar } from "drizzle-orm/pg-core";
-import { timestamps } from "../columns.helpers";
-import { Ticket } from "./ticket";
+import { integer, pgTable, primaryKey, timestamp, varchar } from "drizzle-orm/pg-core";
 import { Organization } from "./organization";
+import { Ticket } from "./ticket";
 
 export const Status = pgTable("status", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  name: varchar().unique().notNull(),
+  name: varchar().notNull(),
 
   organizationId: integer()
     .notNull()
     .references(() => Organization.id),
 
-  ...timestamps,
-});
+  createdAt: timestamp().defaultNow().notNull(),
+}
+);
 
 export const StatusRelations = relations(Status, ({ many, one }) => ({
   tickets: many(Ticket),

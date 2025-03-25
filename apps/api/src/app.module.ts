@@ -14,6 +14,7 @@ import { TagsModule } from './schemas/tags/tags.module';
 import { TicketsModule } from './schemas/tickets/tickets.module';
 import { UsersModule } from './schemas/users/users.module';
 import { MembersModule } from './schemas/members/members.module';
+import { CategoriesModule } from './schemas/categories/categories.module';
 
 @Module({
   imports: [
@@ -26,7 +27,8 @@ import { MembersModule } from './schemas/members/members.module';
     TagsModule,
     OrganizationsModule,
     GroupsModule,
-    MembersModule
+    MembersModule,
+    CategoriesModule
   ],
   controllers: [AppController],
   providers: [

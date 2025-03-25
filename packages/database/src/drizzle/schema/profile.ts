@@ -1,6 +1,11 @@
 import { relations } from "drizzle-orm";
-import { integer, pgTable as table, varchar } from "drizzle-orm/pg-core";
-import { timestamps } from "../columns.helpers";
+import {
+  integer,
+  pgTable as table,
+  timestamp,
+  varchar,
+} from "drizzle-orm/pg-core";
+
 import { User } from "./user";
 
 export const Profile = table("profile", {
@@ -17,7 +22,7 @@ export const Profile = table("profile", {
     .notNull()
     .references(() => User.id),
 
-  ...timestamps,
+  createdAt: timestamp().defaultNow().notNull(),
 });
 
 export const ProfileRelations = relations(Profile, ({ one }) => ({

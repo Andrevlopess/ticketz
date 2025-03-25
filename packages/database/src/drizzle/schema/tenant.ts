@@ -1,5 +1,5 @@
 import { integer, pgTable, varchar } from "drizzle-orm/pg-core";
-import { timestamps } from "../columns.helpers";
+import { softDeleteTimestamps } from "../columns.helpers";
 
 export const Tenant = pgTable("tenant", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
@@ -7,7 +7,7 @@ export const Tenant = pgTable("tenant", {
   slug: varchar().unique().notNull(),
   domain: varchar().unique().notNull(),
 
-  ...timestamps,
+  ...softDeleteTimestamps,
 });
 
 // export const TenantRelations = relations(Tenant, ({ many, one }) => ({

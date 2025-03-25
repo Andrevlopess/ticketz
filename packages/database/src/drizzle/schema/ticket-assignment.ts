@@ -1,10 +1,7 @@
-import { integer } from "drizzle-orm/pg-core";
-import { pgTable } from "drizzle-orm/pg-core";
-import { User } from "./user";
-import { Ticket } from "./ticket";
-import { timestamps } from "../columns.helpers";
-import { primaryKey } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
+import { integer, pgTable, primaryKey, timestamp } from "drizzle-orm/pg-core";
+import { Ticket } from "./ticket";
+import { User } from "./user";
 
 export const TicketAssignments = pgTable(
   "ticketAssignments",
@@ -19,29 +16,30 @@ export const TicketAssignments = pgTable(
       .notNull()
       .references(() => Ticket.id),
 
-    ...timestamps,
+    createdAt: timestamp().defaultNow().notNull(),
   },
   (t) => [primaryKey({ columns: [t.ticketId, t.assigneeId] })]
 );
 
+export const TicketAssignmentsRelations = relations(
+  TicketAssignments,
+  ({ one }) => ({
+    assigneeId: one(User, {
+      relationName: "assigneesOnTicket",
+      fields: [TicketAssignments.assigneeId],
+      references: [User.id],
+    }),
+    assignerId: one(User, {
+      relationName: "assignersOnTicket",
+      fields: [TicketAssignments.assignerId],
+      references: [User.id],
+    }),
+    ticket: one(Ticket, {
+      fields: [TicketAssignments.ticketId],
+      references: [Ticket.id],
+    }),
+  })
+);
 
-export const TicketAssignmentsRelations = relations(TicketAssignments, ({ one }) => ({
-  assigneeId: one(User, {
-    relationName: 'assigneesOnTicket',
-    fields: [TicketAssignments.assigneeId],
-    references: [User.id],
-  }),
-  assignerId: one(User, {
-    relationName: 'assignersOnTicket',
-    fields: [TicketAssignments.assignerId],
-    references: [User.id],
-  }),
-  ticket: one(Ticket, {
-    fields: [TicketAssignments.ticketId],
-    references: [Ticket.id],
-  }),
-}));
-
-
-export type TicketAssignmentsInsert = typeof TicketAssignments.$inferInsert
-export type TicketAssignmentsSelect = typeof TicketAssignments.$inferSelect 
+export type TicketAssignmentsInsert = typeof TicketAssignments.$inferInsert;
+export type TicketAssignmentsSelect = typeof TicketAssignments.$inferSelect;

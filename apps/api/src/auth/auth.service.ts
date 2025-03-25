@@ -8,9 +8,8 @@ import { UsersService } from '../schemas/users/users.service';
 import { z } from 'zod';
 import { Role } from '@ticketz/database';
 
-type RefreshTokenPayload = { sub: number; orgId: number };
-export type User = { id: string; email: string; orgId: number; role: Role };
-export type AccessTokenPayload = Omit<User, 'id'> & { sub: number };
+export type User = { id: string; orgId: number; role: Role };
+export type Token = Omit<User, 'id'> & { sub: number };
 
 @Injectable()
 export class AuthService {
@@ -19,8 +18,8 @@ export class AuthService {
     private readonly usersService: UsersService,
   ) {}
 
-  async validateUser(data: AuthInput): Promise<AccessTokenPayload | null> {
-    const user = await this.usersService.findUserByEmail(data.email);    
+  async validateUser(data: AuthInput): Promise<Token | null> {
+    const user = await this.usersService.findUserByEmail(data.email);
     if (!user) return null;
 
     const validPassword = await bcrypt.compare(data.password, user.password);
@@ -28,7 +27,6 @@ export class AuthService {
 
     return {
       sub: user.id,
-      email: user.email,
       orgId: user.defaultOrganizationId,
       role: user.role,
     };
@@ -55,16 +53,16 @@ export class AuthService {
   }
 
   private async _generateAccessToken(
-    payload: AccessTokenPayload,
+    payload: Token,
   ): Promise<string> {
     return await this.jwtService.signAsync(payload);
   }
 
   private async _generateRefreshToken(
-    payload: RefreshTokenPayload,
+    payload: Token,
   ): Promise<string> {
     return await this.jwtService.signAsync(
-      { sub: payload.sub },
+      payload,
       {
         secret: appConfig().jwtRefreshSecret,
         expiresIn: '30d',
@@ -73,8 +71,10 @@ export class AuthService {
   }
 
   async refreshToken(token: string): Promise<AuthResponse> {
+    console.log(token);
+
     try {
-      const payload: AccessTokenPayload = await this.jwtService.verifyAsync(
+      const payload: Token = await this.jwtService.verifyAsync(
         token,
         {
           secret: appConfig().jwtRefreshSecret,
@@ -83,13 +83,13 @@ export class AuthService {
 
       const accessToken = await this._generateAccessToken({
         sub: payload.sub,
-        email: payload.email,
-        orgId: payload.orgId,
         role: payload.role,
+        orgId: payload.orgId,
       });
 
       const refreshToken = await this._generateRefreshToken({
         sub: payload.sub,
+        role: payload.role,
         orgId: payload.orgId,
       });
 

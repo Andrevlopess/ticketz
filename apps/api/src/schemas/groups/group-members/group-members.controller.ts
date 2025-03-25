@@ -7,22 +7,31 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Req,
 } from '@nestjs/common';
 import { TagSelect, UserSelect } from '@ticketz/database';
 import { GroupMembersService } from './group-members.service';
+import type { Request } from 'express';
 
-@Controller('groups/:id/members')
+@Controller('groups/:groupId/members')
 export class GroupMembersController {
   constructor(private readonly groupMembersService: GroupMembersService) {}
 
   @Get()
-  findMany(@Param('id', ParseIntPipe) id: number) {
-    return this.groupMembersService.findMany(id);
+  findMany(
+    @Param('groupId', ParseIntPipe) groupId: number,
+    @Req() req: Request,
+  ) {
+    return this.groupMembersService.findMany(groupId, req.user.orgId);
   }
 
   @Post()
-  addMember(@Param('id', ParseIntPipe) id: number, @Body() users: Pick<UserSelect, 'id'>[]) {
-    return this.groupMembersService.add(id, users);
+  addMember(
+    @Param('groupId', ParseIntPipe) groupId: number,
+    @Body() userId: Pick<UserSelect, 'id'>,
+    @Req() req: Request,
+  ) {
+    return this.groupMembersService.add(req.user.sub, groupId, userId);
   }
 
   // @Patch()
@@ -32,9 +41,10 @@ export class GroupMembersController {
 
   @Delete(':userId')
   removeTag(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('groupId', ParseIntPipe) groupId: number,
     @Param('userId', ParseIntPipe) userId: number,
+    @Req() req: Request,
   ) {
-    return this.groupMembersService.remove(id, userId);
+    return this.groupMembersService.remove(req.user.sub, groupId, userId);
   }
 }

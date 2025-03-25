@@ -1,25 +1,31 @@
 import { relations } from "drizzle-orm";
-import { integer, pgTable, primaryKey, varchar } from "drizzle-orm/pg-core";
-import { timestamps } from "../columns.helpers";
-import { Ticket } from "./ticket";
-import { User } from "./user";
+import {
+  integer,
+  pgTable,
+  timestamp,
+  varchar
+} from "drizzle-orm/pg-core";
+import { GroupMembership } from "./group-membership";
 import { Organization } from "./organization";
+import { Ticket } from "./ticket";
 
-export const Group = pgTable("group", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  name: varchar().unique().notNull(),
+export const Group = pgTable(
+  "group",
+  {
+    id: integer().primaryKey().generatedAlwaysAsIdentity(),
+    name: varchar().notNull(),
 
-  description: varchar(),
+    description: varchar(),
 
-  organizationId: integer()
-    .notNull()
-    .references(() => Organization.id),
+    organizationId: integer()
+      .notNull()
+      .references(() => Organization.id),
 
-  ...timestamps,
-});
+    createdAt: timestamp().defaultNow().notNull(),
+  });
 
 export const GroupRelations = relations(Group, ({ many, one }) => ({
-  users: many(UsersOnGroup),
+  users: many(GroupMembership),
   tickets: many(Ticket),
   organization: one(Organization, {
     fields: [Group.organizationId],
@@ -27,25 +33,7 @@ export const GroupRelations = relations(Group, ({ many, one }) => ({
   }),
 }));
 
-export const UsersOnGroup = pgTable(
-  "usersOnGroup",
-  {
-    userId: integer()
-      .notNull()
-      .references(() => User.id),
-    groupId: integer()
-      .notNull()
-      .references(() => Group.id),
 
-    ...timestamps,
-  },
-  (t) => [primaryKey({ columns: [t.userId, t.groupId] })]
-);
-
-export const UsersOnGroupRelations = relations(UsersOnGroup, ({ one }) => ({
-  user: one(User, { fields: [UsersOnGroup.userId], references: [User.id] }),
-  group: one(Group, { fields: [UsersOnGroup.groupId], references: [Group.id] }),
-}));
 
 export type GroupSelect = typeof Group.$inferSelect;
 export type GroupInsert = typeof Group.$inferInsert;

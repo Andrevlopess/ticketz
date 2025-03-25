@@ -1,6 +1,6 @@
 import { relations } from "drizzle-orm";
 import { integer, pgTable as table, varchar } from "drizzle-orm/pg-core";
-import { timestamps } from "../columns.helpers";
+import { softDeleteTimestamps } from "../columns.helpers";
 import { MemberShip } from "./membership";
 import { Ticket } from "./ticket";
 import { Group } from "./group";
@@ -20,7 +20,7 @@ export const Organization = table("organization", {
     .notNull()
     .references(() => Tenant.id),
 
-  ...timestamps,
+  ...softDeleteTimestamps
 });
 
 export const OrganizationRelations = relations(

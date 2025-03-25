@@ -8,7 +8,7 @@ import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { IS_PUBLIC_KEY } from 'src/decorators/public.decorator';
-import { AccessTokenPayload, AuthService } from '../auth.service';
+import { Token } from '../auth.service';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
@@ -33,11 +33,9 @@ export class JwtAuthGuard implements CanActivate {
 
     try {
       const payload =
-        await this.jwtService.verifyAsync<AccessTokenPayload>(token);
+        await this.jwtService.verifyAsync<Token>(token);
 
-      console.log(payload);
-
-      request['user'] = payload as Required<AccessTokenPayload>;
+      request['user'] = payload as Required<Token>;
     } catch {
       throw new UnauthorizedException('Invalid token provided!');
     }
