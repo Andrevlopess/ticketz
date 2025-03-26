@@ -22,7 +22,7 @@ export class GroupMembersController {
     @Param('groupId', ParseIntPipe) groupId: number,
     @Req() req: Request,
   ) {
-    return this.groupMembersService.findMany(groupId, req.user.orgId);
+    return this.groupMembersService.findMany(groupId, req.user.org.id);
   }
 
   @Post()

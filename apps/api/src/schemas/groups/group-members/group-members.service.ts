@@ -16,16 +16,28 @@ import {
 } from '@ticketz/database';
 import { and, eq, getTableColumns } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { CaslAbilityFactory, CaslUser } from 'src/casl/factory/casl-ability.factory';
 import { DrizzleAsyncProvider } from 'src/drizzle/drizzle.provider';
+import { Action } from 'src/models/actions';
 
 @Injectable()
 export class GroupMembersService {
   constructor(
     @Inject(DrizzleAsyncProvider)
     private db: NodePgDatabase<typeof GlobalSchema>,
+    private caslAbilityFactory: CaslAbilityFactory,
   ) {}
 
   findMany(groupId: number, orgId: number) {
+
+    const user = new CaslUser(1, true);
+
+    const { can, cannot } = this.caslAbilityFactory.createForCaslUser(user);
+
+    if (can(Action.Manage, 'all')) {
+      return 'émonstro';
+    }
+
     const { id, userId, createdAt, ...profileData } = getTableColumns(Profile);
 
     const groupMembers = this.db.transaction(async (trx) => {
@@ -110,7 +122,7 @@ export class GroupMembersService {
     // a user must be of the company to be assigned to a group of this same company
   }
 
-  async remove(requesterId:number, groupId: number, userId: number) {
+  async remove(requesterId: number, groupId: number, userId: number) {
     const [canCreateGroup] = await this.db
       .select()
       .from(GroupMembership)

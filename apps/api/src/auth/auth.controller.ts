@@ -60,18 +60,18 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     // return req.cookies
-    const { accessToken, refreshToken } = await this.authService.refreshToken(
-      req.cookies.refreshToken,
-    );
+    // const { accessToken, refreshToken } = await this.authService.refreshToken(
+    //   req.cookies.refreshToken,
+    // );
 
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'lax',
-      path: '/',
-    });
+    // res.cookie('refreshToken', refreshToken, {
+    //   httpOnly: true,
+    //   secure: true,
+    //   sameSite: 'lax',
+    //   path: '/',
+    // });
 
-    return { accessToken };
+    // return { accessToken };
   }
 
   @UseGuards(JwtAuthGuard)

@@ -23,12 +23,12 @@ export class CategoriesController {
 
   @Get()
   findAll(@Req() req: Request) {
-    return this.categoriesService.findAll(req.user.orgId);
+    return this.categoriesService.findAll(req.user.org.id);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string, @Req() req: Request) {
-    return this.categoriesService.findOne(+id, req.user.orgId);
+    return this.categoriesService.findOne(+id, req.user.org.id);
   }
 
   @Patch(':id')

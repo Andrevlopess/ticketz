@@ -25,7 +25,7 @@ export const UserRelations = relations(User, ({ one, many }) => ({
   // profile: one(Profile),
   memberships: many(MemberShip),
   notes: many(TicketNote, { relationName: "notesOnTicket" }),
-  usersOnGroup: many(GroupMembership),
+  groupMemberships: many(GroupMembership),
   assignees: many(TicketAssignments, { relationName: "assigneesOnTicket" }),
   assigner: many(TicketAssignments, { relationName: "assignersOnTicket" }),
   createdTickets: many(Ticket),

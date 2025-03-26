@@ -24,19 +24,19 @@ export class GroupsController {
   create(@Body() createGroupDto: GroupInsert, @Req() req: Request) {
     return this.groupsService.create({
       ...createGroupDto,
-      organizationId: req.user.orgId,
+      organizationId: req.user.org.id,
     });
   }
 
   @Get()
   findAll(@Req() req: Request) {
-    return this.groupsService.findAll(req.user.orgId);
+    return this.groupsService.findAll(req.user.org.id);
   }
 
   @Get(':id')
   @Roles('ADMIN')
   findOne(@Param('id', ParseIntPipe) id: number, @Req() req: Request) {
-    return this.groupsService.findOne(id, req.user.orgId);
+    return this.groupsService.findOne(id, req.user.org.id);
   }
 
   @Patch(':id')

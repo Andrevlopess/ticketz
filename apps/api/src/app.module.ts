@@ -15,6 +15,7 @@ import { TicketsModule } from './schemas/tickets/tickets.module';
 import { UsersModule } from './schemas/users/users.module';
 import { MembersModule } from './schemas/members/members.module';
 import { CategoriesModule } from './schemas/categories/categories.module';
+import { CaslModule } from './casl/casl.module';
 
 @Module({
   imports: [
@@ -28,7 +29,8 @@ import { CategoriesModule } from './schemas/categories/categories.module';
     OrganizationsModule,
     GroupsModule,
     MembersModule,
-    CategoriesModule
+    CategoriesModule,
+    CaslModule
   ],
   controllers: [AppController],
   providers: [

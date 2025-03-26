@@ -2,19 +2,29 @@ import {
   BadRequestException,
   Inject,
   Injectable,
-  NotFoundException
+  NotFoundException,
 } from '@nestjs/common';
 import {
   GlobalSchema,
+  GroupMembership,
   MemberShip,
   MembershipSelect,
   Organization,
   Role,
   User,
   UserInsert,
-  UserSelect
+  UserSelect,
 } from '@ticketz/database';
-import { and, eq, getTableColumns, isNotNull, isNull, sql } from 'drizzle-orm';
+import { group } from 'console';
+import {
+  and,
+  eq,
+  getTableColumns,
+  isNotNull,
+  isNull,
+  or,
+  sql,
+} from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { createInsertSchema, createUpdateSchema } from 'drizzle-zod';
 import { DrizzleAsyncProvider } from 'src/drizzle/drizzle.provider';
@@ -27,10 +37,32 @@ const UserUpdateSchema = createUpdateSchema(User)
   .strict();
 
 export type UserUpdate = z.infer<typeof UserUpdateSchema>;
-type ValidateUser = Pick<
-  UserSelect,
-  'id' | 'email' | 'password' | 'defaultOrganizationId'
-> & { role: Role };
+
+// {
+//   id: 10,
+//   defaultOrganizationId: 1,
+//   email: 'andrellopes@gmail.com',
+//   password: '$2b$10$4itu.ybRAtT.sd.tYeGNgeD7bni0/YqPHC/zvqoUDX1lA22W59Wmi',
+//   memberships: [ { role: 'USER', organizationId: 1 } ],
+//   groupMemberships: [
+//     { role: 'GROUP_MANAGER', groupId: 1 },
+//     { role: 'MEMBER', groupId: 7 }
+//   ]
+// }
+interface UserWithMemberships
+  extends Omit<
+    UserSelect,
+    'defaultOrganizationId' | 'deletedAt' | 'updatedAt' | 'createdAt'
+  > {
+  memberships: {
+    role: Role;
+    organizationId: number;
+  }[];
+  groupMemberships: {
+    role: string;
+    groupId: number;
+  }[];
+}
 
 @Injectable()
 export class UsersService {
@@ -134,27 +166,33 @@ export class UsersService {
       .returning();
   }
 
-  ////
-
-  async findUserByEmail(email: string): Promise<ValidateUser | undefined> {
-    const [user] = await this.db
-      .select({
-        id: User.id,
-        email: User.email,
-        password: User.password,
-        defaultOrganizationId: User.defaultOrganizationId,
-        role: MemberShip.role,
-      })
-      .from(User)
-      .innerJoin(
-        MemberShip,
-        and(
-          eq(MemberShip.userId, User.id),
-          eq(MemberShip.organizationId, User.defaultOrganizationId),
-        ),
-      )
-      .where(and(eq(User.email, email), isNotNull(User.defaultOrganizationId)));
-
+  async findUserByEmail(
+    email: string,
+  ): Promise<UserWithMemberships | undefined> {
+    const user = await this.db.query.User.findFirst({
+      where: eq(User.email, email),
+      columns: {
+        id: true,
+        email: true,
+        password: true,
+      },
+      with: {
+        memberships: {
+          columns: {
+            role: true,
+            organizationId: true,
+          },
+        },
+        groupMemberships: {
+          columns: {
+            role: true,
+            groupId: true,
+          },
+        },
+      },
+    });
+    console.log(user);
+    
     return user;
   }
 

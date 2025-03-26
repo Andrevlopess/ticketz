@@ -9,13 +9,17 @@ declare global {
     interface Request {
       user: {
         sub: number;
-        orgId: number;
+        org: { id: number; role: Role };
+        grps?: {
+          id: number;
+          role: GroupRole;
+        }[];
       };
-      getUserMembership: (orgId: number) => Promise<{
-        membership: MembershipSelect;
-        organization: OrganizationSelect;
-      }>;
-      getCurrentUserId: () => Promise<number>;
+      // getUserMembership: (orgId: number) => Promise<{
+      //   membership: MembershipSelect;
+      //   organization: OrganizationSelect;
+      // }>;
+      // getCurrentUserId: () => Promise<number>;
     }
   }
 }

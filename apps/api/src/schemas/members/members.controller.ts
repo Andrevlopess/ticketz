@@ -20,7 +20,7 @@ export class MembersController {
 
   @Get()
   findMany(@Req() req: Request) {
-    return this.MembersService.findMany(req.user.orgId);
+    return this.MembersService.findMany(req.user.org.id);
   }
 
   @Get(':id')
@@ -28,7 +28,7 @@ export class MembersController {
     @Param('id', ParseIntPipe) id: number,
     @Req() req: Request,
   ) {
-    return this.MembersService.findOne(id, req.user.orgId);
+    return this.MembersService.findOne(id, req.user.org.id);
   }
 
 

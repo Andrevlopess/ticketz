@@ -6,10 +6,18 @@ import bcrypt from 'bcrypt';
 import appConfig from 'src/config/app.config';
 import { UsersService } from '../schemas/users/users.service';
 import { z } from 'zod';
-import { Role } from '@ticketz/database';
+import { GroupRole, Role } from '@ticketz/database';
 
-export type User = { id: string; orgId: number; role: Role };
-export type Token = Omit<User, 'id'> & { sub: number };
+// export type User = { id: string; orgId: number; role: Role };
+export type RefreshTokenPayload = { sub: number };
+export type AccessTokenPayload = {
+  sub: number;
+  org: { id: number; role: Role };
+  grps?: {
+    id: number;
+    role: GroupRole;
+  }[];
+};
 
 @Injectable()
 export class AuthService {
@@ -18,18 +26,28 @@ export class AuthService {
     private readonly usersService: UsersService,
   ) {}
 
-  async validateUser(data: AuthInput): Promise<Token | null> {
+  async validateUser(data: AuthInput): Promise<AccessTokenPayload | null> {
     const user = await this.usersService.findUserByEmail(data.email);
     if (!user) return null;
 
     const validPassword = await bcrypt.compare(data.password, user.password);
     if (!validPassword) return null;
 
-    return {
+    if (!user.memberships[0]) return null;
+
+    const payload: AccessTokenPayload = {
       sub: user.id,
-      orgId: user.defaultOrganizationId,
-      role: user.role,
+      org: {
+        id: user.memberships[0].organizationId,
+        role: user.memberships[0].role as Role,
+      },
+      grps: user.groupMemberships.map((group) => ({
+        id: group.groupId,
+        role: group.role as GroupRole,
+      })),
     };
+
+    return payload;
   }
 
   async getMembership(userId: number, organizationId: number) {
@@ -53,50 +71,42 @@ export class AuthService {
   }
 
   private async _generateAccessToken(
-    payload: Token,
+    payload: AccessTokenPayload,
   ): Promise<string> {
     return await this.jwtService.signAsync(payload);
   }
 
   private async _generateRefreshToken(
-    payload: Token,
+    payload: RefreshTokenPayload,
   ): Promise<string> {
-    return await this.jwtService.signAsync(
-      payload,
-      {
-        secret: appConfig().jwtRefreshSecret,
-        expiresIn: '30d',
-      },
-    );
+    return await this.jwtService.signAsync(payload, {
+      secret: appConfig().jwtRefreshSecret,
+      expiresIn: '30d',
+    });
   }
 
-  async refreshToken(token: string): Promise<AuthResponse> {
+  async refreshToken(token: string) {
+    // : Promise<AuthResponse> ;
     console.log(token);
 
     try {
-      const payload: Token = await this.jwtService.verifyAsync(
-        token,
-        {
-          secret: appConfig().jwtRefreshSecret,
-        },
-      );
-
-      const accessToken = await this._generateAccessToken({
-        sub: payload.sub,
-        role: payload.role,
-        orgId: payload.orgId,
-      });
-
-      const refreshToken = await this._generateRefreshToken({
-        sub: payload.sub,
-        role: payload.role,
-        orgId: payload.orgId,
-      });
-
-      return {
-        accessToken,
-        refreshToken,
-      };
+      // const payload: Token = await this.jwtService.verifyAsync(token, {
+      //   secret: appConfig().jwtRefreshSecret,
+      // });
+      // const accessToken = await this._generateAccessToken({
+      //   sub: payload.sub,
+      //   role: payload.role,
+      //   orgId: payload.orgId,
+      // });
+      // const refreshToken = await this._generateRefreshToken({
+      //   sub: payload.sub,
+      //   role: payload.role,
+      //   orgId: payload.orgId,
+      // });
+      // return {
+      //   accessToken,
+      //   refreshToken,
+      // };
     } catch (error) {
       throw new UnauthorizedException(error);
     }
