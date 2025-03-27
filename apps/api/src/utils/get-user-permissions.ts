@@ -1,14 +1,7 @@
-// import { defineAbilityFor } from '@ticketz/auth';
-// import { Role } from '@ticketz/database';
+import { defineAbilityFor, User } from '@ticketz/auth';
 
-// export function getUserPermissions(userId: number, role: Role) {
-//   //   const authUser = userSchema.parse({
-//   //     id: userId,
-//   //     role,
-//   //   });
+export function getUserPermissions(authUser: User) {
+  const ability = defineAbilityFor(authUser);
 
-//   const authUser = { id: userId, role };
-//   const ability = defineAbilityFor(authUser);
-
-//   return ability;
-// }
+  return ability;
+}

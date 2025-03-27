@@ -86,27 +86,42 @@ export class AuthService {
   }
 
   async refreshToken(token: string) {
-    // : Promise<AuthResponse> ;
     console.log(token);
 
     try {
-      // const payload: Token = await this.jwtService.verifyAsync(token, {
-      //   secret: appConfig().jwtRefreshSecret,
-      // });
-      // const accessToken = await this._generateAccessToken({
-      //   sub: payload.sub,
-      //   role: payload.role,
-      //   orgId: payload.orgId,
-      // });
-      // const refreshToken = await this._generateRefreshToken({
-      //   sub: payload.sub,
-      //   role: payload.role,
-      //   orgId: payload.orgId,
-      // });
-      // return {
-      //   accessToken,
-      //   refreshToken,
-      // };
+      const payload: RefreshTokenPayload = await this.jwtService.verifyAsync(
+        token,
+        {
+          secret: appConfig().jwtRefreshSecret,
+        },
+      );
+
+      const accessToken = await this._generateAccessToken({
+        sub: 10,
+        org: {
+          id: 1,
+          role: 'ADMIN',
+        },
+        grps: [
+          {
+            id: 1,
+            role: 'GROUP_MANAGER',
+          },
+          {
+            id: 7,
+            role: 'MEMBER',
+          },
+        ],
+      });
+
+      const refreshToken = await this._generateRefreshToken({
+        sub: payload.sub,
+      });
+
+      return {
+        accessToken,
+        refreshToken,
+      };
     } catch (error) {
       throw new UnauthorizedException(error);
     }

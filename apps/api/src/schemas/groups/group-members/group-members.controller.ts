@@ -5,19 +5,24 @@ import {
   Get,
   Param,
   ParseIntPipe,
-  Patch,
   Post,
   Req,
+  UseGuards
 } from '@nestjs/common';
-import { TagSelect, UserSelect } from '@ticketz/database';
-import { GroupMembersService } from './group-members.service';
+import { UserSelect } from '@ticketz/database';
 import type { Request } from 'express';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { GroupMembersService } from './group-members.service';
+import { Roles } from 'src/decorators/roles.decorator';
+import { Permissions } from 'src/decorators/permissions.decorator';
 
 @Controller('groups/:groupId/members')
 export class GroupMembersController {
   constructor(private readonly groupMembersService: GroupMembersService) {}
 
   @Get()
+  @Roles('ADMIN')
+  // @Permissions('read:group_members')
   findMany(
     @Param('groupId', ParseIntPipe) groupId: number,
     @Req() req: Request,

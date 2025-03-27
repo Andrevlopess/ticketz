@@ -16,6 +16,7 @@ import { UsersModule } from './schemas/users/users.module';
 import { MembersModule } from './schemas/members/members.module';
 import { CategoriesModule } from './schemas/categories/categories.module';
 import { CaslModule } from './casl/casl.module';
+import { PermissionGuard } from './auth/guards/permissions.guard';
 
 @Module({
   imports: [
@@ -42,6 +43,10 @@ import { CaslModule } from './casl/casl.module';
     {
       provide: APP_GUARD,
       useClass: RolesGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: PermissionGuard,
     },
   ],
 })
