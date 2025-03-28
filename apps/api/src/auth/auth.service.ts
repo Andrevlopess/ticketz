@@ -2,11 +2,10 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AuthInput, AuthResponse } from '@ticketz/types';
 // import { RoleEnum, Role } from '@ticketz/database';
+import { GroupRole, Role } from '@ticketz/database';
 import bcrypt from 'bcrypt';
 import appConfig from 'src/config/app.config';
 import { UsersService } from '../schemas/users/users.service';
-import { z } from 'zod';
-import { GroupRole, Role } from '@ticketz/database';
 
 // export type User = { id: string; orgId: number; role: Role };
 export type RefreshTokenPayload = { sub: number };
@@ -50,10 +49,6 @@ export class AuthService {
     return payload;
   }
 
-  async getMembership(userId: number, organizationId: number) {
-    return this.usersService.getMembership(userId, organizationId);
-  }
-
   async authenticate(user: AuthInput): Promise<AuthResponse> {
     const validUser = await this.validateUser(user);
 
@@ -70,6 +65,51 @@ export class AuthService {
     };
   }
 
+  async refreshToken(token: string) {
+    try {
+      const tokenData: RefreshTokenPayload = await this.jwtService.verifyAsync(
+        token,
+        {
+          secret: appConfig().jwtRefreshSecret,
+        },
+      );
+
+      const user = await this.usersService.findUserById(tokenData.sub);
+      if (!user) {
+        throw new UnauthorizedException('User not found!');
+      }
+
+      if (!user.memberships[0]) {
+        throw new UnauthorizedException('Membership not found!');
+      }
+
+      const payload: AccessTokenPayload = {
+        sub: user.id,
+        org: {
+          id: user.memberships[0].organizationId,
+          role: user.memberships[0].role as Role,
+        },
+        grps: user.groupMemberships.map((group) => ({
+          id: group.groupId,
+          role: group.role as GroupRole,
+        })),
+      };
+
+      const refreshToken = await this._generateRefreshToken({
+        sub: tokenData.sub,
+      });
+
+      const accessToken = await this._generateRefreshToken(payload);
+
+      return {
+        accessToken,
+        refreshToken,
+      };
+    } catch (error) {
+      throw new UnauthorizedException(error);
+    }
+  }
+
   private async _generateAccessToken(
     payload: AccessTokenPayload,
   ): Promise<string> {
@@ -83,47 +123,5 @@ export class AuthService {
       secret: appConfig().jwtRefreshSecret,
       expiresIn: '30d',
     });
-  }
-
-  async refreshToken(token: string) {
-    console.log(token);
-
-    try {
-      const payload: RefreshTokenPayload = await this.jwtService.verifyAsync(
-        token,
-        {
-          secret: appConfig().jwtRefreshSecret,
-        },
-      );
-
-      const accessToken = await this._generateAccessToken({
-        sub: 10,
-        org: {
-          id: 1,
-          role: 'USER',
-        },
-        grps: [
-          {
-            id: 1,
-            role: 'GROUP_MANAGER',
-          },
-          {
-            id: 7,
-            role: 'MEMBER',
-          },
-        ],
-      });
-
-      const refreshToken = await this._generateRefreshToken({
-        sub: payload.sub,
-      });
-
-      return {
-        accessToken,
-        refreshToken,
-      };
-    } catch (error) {
-      throw new UnauthorizedException(error);
-    }
   }
 }

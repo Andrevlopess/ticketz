@@ -191,28 +191,56 @@ export class UsersService {
         },
       },
     });
-    console.log(user);
     
     return user;
   }
 
-  async getMembership(
-    userId: number,
-    organizationId: number,
-  ): Promise<MembershipSelect | undefined> {
-    const [membership] = await this.db
-      .select({
-        ...getTableColumns(MemberShip),
-      })
-      .from(MemberShip)
-      .innerJoin(Organization, eq(MemberShip.organizationId, Organization.id))
-      .where(
-        and(
-          eq(MemberShip.userId, userId),
-          eq(MemberShip.organizationId, organizationId),
-        ),
-      );
-
-    return membership;
+  async findUserById(
+    id: number,
+  ): Promise<UserWithMemberships | undefined> {
+    const user = await this.db.query.User.findFirst({
+      where: eq(User.id, id),
+      columns: {
+        id: true,
+        email: true,
+        password: true,
+      },
+      with: {
+        memberships: {
+          columns: {
+            role: true,
+            organizationId: true,
+          },
+        },
+        groupMemberships: {
+          columns: {
+            role: true,
+            groupId: true,
+          },
+        },
+      },
+    });
+    
+    return user;
   }
+
+  // async getMembership(
+  //   userId: number,
+  //   organizationId: number,
+  // ): Promise<MembershipSelect | undefined> {
+  //   const [membership] = await this.db
+  //     .select({
+  //       ...getTableColumns(MemberShip),
+  //     })
+  //     .from(MemberShip)
+  //     .innerJoin(Organization, eq(MemberShip.organizationId, Organization.id))
+  //     .where(
+  //       and(
+  //         eq(MemberShip.userId, userId),
+  //         eq(MemberShip.organizationId, organizationId),
+  //       ),
+  //     );
+
+  //   return membership;
+  // }
 }

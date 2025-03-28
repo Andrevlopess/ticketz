@@ -34,32 +34,6 @@ export class GroupMembersService {
 
   findMany(groupId: number, orgId: number) {
   
-
-    // const {can, rules} = getUserPermissions(authUser)
-
-    // if(can('invite', group)) {
-    //   console.log('can invite')
-    // }
-
-    // return rules
-
-    return;
-
-    // const group = groupSchema.parse({
-    //   id: groupId,
-    //   ownerId: 4,
-    // })
-
-    // const { can, cannot, rules } =
-    //   this.caslAbilityFactory.defineAbilityFor(authUser);
-
-    // return {
-    //   rules,
-    //   manageAll: can(Action.Manage, 'all'),
-    //   manageGroup: can('invite', group),
-    //   // canUpdate: can('manage', ArticleTeste),
-    // };
-
     const { id, userId, createdAt, ...profileData } = getTableColumns(Profile);
 
     const groupMembers = this.db.transaction(async (trx) => {
