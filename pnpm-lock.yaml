@@ -340,6 +340,9 @@ importers:
       '@ticketz/database':
         specifier: workspace:*
         version: link:../database
+      drizzle-zod:
+        specifier: ^0.7.0
+        version: 0.7.0(drizzle-orm@0.40.0(@prisma/client@6.4.1(prisma@6.4.1(typescript@5.8.2))(typescript@5.8.2))(@types/pg@8.11.11)(gel@2.0.1)(pg@8.13.3)(prisma@6.4.1(typescript@5.8.2)))(zod@3.24.2)
       zod:
         specifier: ^3.24.2
         version: 3.24.2

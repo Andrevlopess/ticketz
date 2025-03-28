@@ -1,6 +1,5 @@
-import { Controller, Get, Post, Req, Res } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
-import type { Request, Response } from 'express';
 import { Public } from './decorators/public.decorator';
 
 @Controller()

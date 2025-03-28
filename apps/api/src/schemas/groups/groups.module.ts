@@ -1,10 +1,8 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { GroupsService } from './groups.service';
-import { GroupsController } from './groups.controller';
+import { Module } from '@nestjs/common';
 import { DrizzleModule } from 'src/drizzle/drizzle.module';
 import { GroupMembersModule } from './group-members/group-members.module';
-import { RouterModule } from '@nestjs/core';
-import { CaslModule } from 'src/casl/casl.module';
+import { GroupsController } from './groups.controller';
+import { GroupsService } from './groups.service';
 
 @Module({
   imports: [DrizzleModule, GroupMembersModule],

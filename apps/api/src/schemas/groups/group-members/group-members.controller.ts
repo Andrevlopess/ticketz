@@ -7,14 +7,13 @@ import {
   ParseIntPipe,
   Post,
   Req,
-  UseGuards
+  UnauthorizedException,
 } from '@nestjs/common';
 import { UserSelect } from '@ticketz/database';
 import type { Request } from 'express';
-import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { GroupMembersService } from './group-members.service';
 import { Roles } from 'src/decorators/roles.decorator';
-import { Permissions } from 'src/decorators/permissions.decorator';
+import { GroupMembersService } from './group-members.service';
+import { defineAbilityFor, userSchema } from '@ticketz/auth';
 
 @Controller('groups/:groupId/members')
 export class GroupMembersController {
@@ -27,6 +26,19 @@ export class GroupMembersController {
     @Param('groupId', ParseIntPipe) groupId: number,
     @Req() req: Request,
   ) {
+    const authUser = userSchema.parse({
+      id: req.user.sub,
+      role: req.user.org.role,
+    });
+
+    const { can, cannot, rules } = defineAbilityFor(authUser);
+
+    console.log(rules);
+    
+    if (cannot('read', 'Group')) {
+      throw new UnauthorizedException();
+    }
+
     return this.groupMembersService.findMany(groupId, req.user.org.id);
   }
 

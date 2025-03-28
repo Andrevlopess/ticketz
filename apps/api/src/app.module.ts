@@ -15,8 +15,6 @@ import { TicketsModule } from './schemas/tickets/tickets.module';
 import { UsersModule } from './schemas/users/users.module';
 import { MembersModule } from './schemas/members/members.module';
 import { CategoriesModule } from './schemas/categories/categories.module';
-import { CaslModule } from './casl/casl.module';
-import { PermissionGuard } from './auth/guards/permissions.guard';
 
 @Module({
   imports: [
@@ -31,7 +29,7 @@ import { PermissionGuard } from './auth/guards/permissions.guard';
     GroupsModule,
     MembersModule,
     CategoriesModule,
-    CaslModule
+    // CaslModule
   ],
   controllers: [AppController],
   providers: [
@@ -44,10 +42,10 @@ import { PermissionGuard } from './auth/guards/permissions.guard';
       provide: APP_GUARD,
       useClass: RolesGuard,
     },
-    {
-      provide: APP_GUARD,
-      useClass: PermissionGuard,
-    },
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: PermissionGuard,
+    // },
   ],
 })
 export class AppModule {}

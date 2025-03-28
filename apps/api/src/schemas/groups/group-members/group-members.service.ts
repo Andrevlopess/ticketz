@@ -5,7 +5,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { groupSchema } from '@ticketz/auth';
+import { defineAbilityFor, groupSchema, userSchema } from '@ticketz/auth';
 import {
   GlobalSchema,
   Group,
@@ -18,10 +18,10 @@ import {
 import { log } from 'console';
 import { and, eq, getTableColumns } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { CaslAbilityFactory } from 'src/casl/casl-ability.factory';
-import { userSchema } from 'src/casl/models/user';
+// import { CaslAbilityFactory } from 'src/casl/casl-ability.factory';
+// import { userSchema } from 'src/casl/models/user';
 import { DrizzleAsyncProvider } from 'src/drizzle/drizzle.provider';
-import { Action } from 'src/models/actions';
+// import { Action } from 'src/models/actions';
 import { getUserPermissions } from 'src/utils/get-user-permissions';
 
 @Injectable()
@@ -29,35 +29,21 @@ export class GroupMembersService {
   constructor(
     @Inject(DrizzleAsyncProvider)
     private db: NodePgDatabase<typeof GlobalSchema>,
-    private caslAbilityFactory: CaslAbilityFactory,
+    // private caslAbilityFactory: CaslAbilityFactory,
   ) {}
 
   findMany(groupId: number, orgId: number) {
+  
 
+    // const {can, rules} = getUserPermissions(authUser)
 
+    // if(can('invite', group)) {
+    //   console.log('can invite')
+    // }
 
-    const authUser = userSchema.parse({
-      id: 1,
-      role: 'USER',
-    });
+    // return rules
 
-    const group = groupSchema.parse({
-      id: groupId,
-      ownerId: 2,
-    })
-
- 
-    const {can, rules} = getUserPermissions(authUser)
-
-
-    if(can('invite', group)) {
-      console.log('can invite')
-    }
-
-
-    return rules
-
-    return
+    return;
 
     // const group = groupSchema.parse({
     //   id: groupId,

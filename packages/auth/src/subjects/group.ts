@@ -4,10 +4,11 @@ import { groupSchema } from '../models/group';
 export const groupSubject = z.tuple([
   z.union([
     z.literal('manage'),
-    z.literal('get'),
+    z.literal('read'),
     z.literal('update'),
-    z.literal('delete'),
-    z.literal('invite'),
+    z.literal('create'),
+    z.literal('invite_members'),
+    z.literal('remove_members'),
   ]),
   z.union([z.literal('Group'), groupSchema]),
 ]);

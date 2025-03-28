@@ -14,7 +14,6 @@ import type { Request, Response } from 'express';
 import { Public } from 'src/decorators/public.decorator';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { Roles } from 'src/decorators/roles.decorator';
 
 @Controller('auth')
 export class AuthController {

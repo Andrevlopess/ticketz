@@ -100,7 +100,7 @@ export class AuthService {
         sub: 10,
         org: {
           id: 1,
-          role: 'ADMIN',
+          role: 'USER',
         },
         grps: [
           {
