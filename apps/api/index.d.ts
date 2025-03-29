@@ -9,7 +9,7 @@ declare global {
     interface Request {
       user: {
         sub: number;
-        org: { id: number; role: Role };
+        role: Role;
         grps?: {
           id: number;
           role: GroupRole;

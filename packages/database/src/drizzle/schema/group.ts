@@ -1,19 +1,16 @@
 import { relations } from "drizzle-orm";
-import {
-  integer,
-  pgTable,
-  timestamp,
-  varchar
-} from "drizzle-orm/pg-core";
+import { integer, pgTable, timestamp, varchar } from "drizzle-orm/pg-core";
 import { GroupMembership } from "./group-membership";
 import { Organization } from "./organization";
 import { Ticket } from "./ticket";
+import { unique } from "drizzle-orm/pg-core";
 
 export const Group = pgTable(
   "group",
   {
     id: integer().primaryKey().generatedAlwaysAsIdentity(),
     name: varchar().notNull(),
+    slug: varchar().notNull(),
 
     description: varchar(),
 
@@ -22,7 +19,9 @@ export const Group = pgTable(
       .references(() => Organization.id),
 
     createdAt: timestamp().defaultNow().notNull(),
-  });
+  },
+  (t) => [unique().on(t.slug, t.organizationId)]
+);
 
 export const GroupRelations = relations(Group, ({ many, one }) => ({
   users: many(GroupMembership),
@@ -32,8 +31,6 @@ export const GroupRelations = relations(Group, ({ many, one }) => ({
     references: [Organization.id],
   }),
 }));
-
-
 
 export type GroupSelect = typeof Group.$inferSelect;
 export type GroupInsert = typeof Group.$inferInsert;

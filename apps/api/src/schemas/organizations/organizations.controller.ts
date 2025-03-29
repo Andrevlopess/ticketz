@@ -33,10 +33,10 @@ export class OrganizationsController {
     return this.organizationsService.create(createOrganizationDto);
   }
 
-  // @Get()
-  // findAll(@Req() req: Request) {
-  //   return this.organizationsService.findMany(req.user.sub);
-  // }
+  @Get()
+  findAll(@Req() req: Request) {
+    return this.organizationsService.findMany(req.user.sub);
+  }
 
   @Get(':id')
   async findOne(@Req() req: Request, @Param('id') id: string) {

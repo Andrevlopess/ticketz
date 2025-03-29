@@ -1,5 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Category, CategoryInsert, GlobalSchema } from '@ticketz/database';
+import {
+  Category,
+  CategoryInsert,
+  GlobalSchema,
+  Organization,
+} from '@ticketz/database';
 import { and, eq } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DrizzleAsyncProvider } from 'src/drizzle/drizzle.provider';
@@ -15,20 +20,22 @@ export class CategoriesService {
     return this.db.insert(Category).values(createCategoryDto).returning();
   }
 
-  async findAll(orgId: number) {
+  async findAll(slug: string) {
     const [categories] = await this.db
       .select()
       .from(Category)
-      .where(eq(Category.organizationId, orgId));
+      .innerJoin(Organization, eq(Organization.id, Category.organizationId))
+      .where(eq(Organization.slug, slug));
 
     return categories;
   }
 
-  async findOne(id: number, orgId: number) {
+  async findOne(id: number, slug: string) {
     const [category] = await this.db
       .select()
       .from(Category)
-      .where(and(eq(Category.organizationId, orgId), eq(Category.id, id)));
+      .innerJoin(Organization, eq(Organization.id, Category.organizationId))
+      .where(and(eq(Organization.slug, slug), eq(Category.id, id)));
 
     return category;
   }

@@ -6,38 +6,36 @@ import {
   Param,
   ParseIntPipe,
   Post,
-  Req
+  Req,
 } from '@nestjs/common';
 import { UserSelect } from '@ticketz/database';
 import type { Request } from 'express';
 import { MembersService } from './members.service';
 
-@Controller('members')
+@Controller('organizations/:slug/members')
 export class MembersController {
-  constructor(
-    private readonly MembersService: MembersService,
-  ) {}
+  constructor(private readonly MembersService: MembersService) {}
 
   @Get()
-  findMany(@Req() req: Request) {
-    return this.MembersService.findMany(req.user.org.id);
+  findMany(@Param('slug') slug: string, @Req() req: Request) {
+    return this.MembersService.findMany(slug);
   }
 
-  @Get(':id')
+  @Get(':memberId')
   findOne(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('slug') slug: string,
+    @Param('memberId', ParseIntPipe) memberId: number,
     @Req() req: Request,
   ) {
-    return this.MembersService.findOne(id, req.user.org.id);
+    return this.MembersService.findOne(memberId, slug);
   }
-
 
   @Post()
   addMember(
-    @Param('id', ParseIntPipe) id: number,
+    // @Param('id', ParseIntPipe) id: number,
     @Body() users: Pick<UserSelect, 'id'>[],
   ) {
-    return this.MembersService.add(id, users);
+    // return thi/s.MembersService.add(users);
   }
 
   // @Patch()

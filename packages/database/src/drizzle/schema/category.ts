@@ -3,7 +3,7 @@ import { integer, pgTable, varchar, timestamp } from "drizzle-orm/pg-core";
 import { Ticket } from "./ticket";
 import { Organization } from "./organization";
 import { primaryKey } from "drizzle-orm/pg-core";
-import { unique } from "drizzle-orm/singlestore-core";
+import { unique } from "drizzle-orm/pg-core";
 
 export const Category = pgTable(
   "category",
@@ -17,7 +17,10 @@ export const Category = pgTable(
       .references(() => Organization.id),
 
     createdAt: timestamp().defaultNow().notNull(),
-  }
+  },
+  (t) => [
+    unique().on(t.name, t.organizationId),
+  ]
 );
 
 export const CategoryRelations = relations(Category, ({ many, one }) => ({

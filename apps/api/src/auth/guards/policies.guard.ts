@@ -32,7 +32,7 @@ export class PoliciesGuard implements CanActivate {
     const request = context.switchToHttp().getRequest() as Request;
 
     const ability = getUserPermissions(request.user);
-
+    
     // first try to check if the user has the permission in the app role (ADMIN | USER)
     // if not, check if the user has the permission in the group role (GROUP_MANAGER | MEMBER)
     const hasAppRolePermission = policyHandlers.every((handler) =>

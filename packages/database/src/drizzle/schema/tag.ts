@@ -2,6 +2,7 @@ import { relations } from "drizzle-orm";
 import { integer, pgTable, primaryKey, timestamp, varchar } from "drizzle-orm/pg-core";
 import { Organization } from "./organization";
 import { Ticket } from "./ticket";
+import { unique } from "drizzle-orm/pg-core";
 
 export const Tag = pgTable("tag", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
@@ -12,7 +13,7 @@ export const Tag = pgTable("tag", {
     .references(() => Organization.id),
 
   createdAt: timestamp().defaultNow().notNull(),
-}
+},(t) => [unique().on(t.name, t.organizationId)]
 );
 
 export const TagRelations = relations(Tag, ({ many, one }) => ({

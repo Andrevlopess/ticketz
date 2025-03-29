@@ -4,7 +4,7 @@ import { AccessTokenPayload } from 'src/auth/auth.service';
 export function getUserPermissions(authUser: AccessTokenPayload) {
   const user = userSchema.parse({
     id: authUser.sub,
-    role: authUser.org.role,
+    role: authUser.role,
   });
 
   const ability = defineAbilityFor(user);

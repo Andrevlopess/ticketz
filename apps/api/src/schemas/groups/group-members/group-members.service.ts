@@ -11,6 +11,7 @@ import {
   Group,
   GroupMembership,
   MemberShip,
+  Organization,
   Profile,
   User,
   UserSelect,
@@ -32,15 +33,15 @@ export class GroupMembersService {
     // private caslAbilityFactory: CaslAbilityFactory,
   ) {}
 
-  findMany(groupId: number, orgId: number) {
-  
+  findMany(groupId: number, slug: string) {
     const { id, userId, createdAt, ...profileData } = getTableColumns(Profile);
 
     const groupMembers = this.db.transaction(async (trx) => {
       const [group] = await trx
         .select()
         .from(Group)
-        .where(and(eq(Group.id, groupId), eq(Group.organizationId, orgId)));
+        .innerJoin(Organization, eq(Organization.id, Group.organizationId))
+        .where(and(eq(Group.id, groupId), eq(Organization.slug, slug)));
 
       if (!group)
         throw new NotFoundException(`Group with id #${groupId} not found!`);
@@ -61,23 +62,6 @@ export class GroupMembersService {
   }
 
   async add(userId: number, groupId: number, user: Pick<UserSelect, 'id'>) {
-    const [canCreateGroup] = await this.db
-      .select()
-      .from(GroupMembership)
-      .where(
-        and(
-          eq(GroupMembership.userId, userId),
-          eq(GroupMembership.groupId, groupId),
-          eq(GroupMembership.role, 'GROUP_MANAGER'),
-        ),
-      );
-
-    if (!canCreateGroup) {
-      throw new ForbiddenException(
-        'You are not allowed to add members to this group.',
-      );
-    }
-
     const [alreadyExists] = await this.db
       .select()
       .from(GroupMembership)
@@ -105,7 +89,7 @@ export class GroupMembersService {
         'User must be a member of the company to be assigned to this group.',
       );
 
-    const insertedTags = this.db
+    const [newMember] = await this.db
       .insert(GroupMembership)
       .values({ userId: user.id, groupId })
       .onConflictDoNothing()
@@ -113,41 +97,37 @@ export class GroupMembersService {
         userId: GroupMembership.userId,
       });
 
-    return insertedTags;
-
-    // a user must be of the company to be assigned to a group of this same company
+    return newMember;
   }
 
-  async remove(requesterId: number, groupId: number, userId: number) {
-    const [canCreateGroup] = await this.db
-      .select()
-      .from(GroupMembership)
-      .where(
-        and(
-          eq(GroupMembership.userId, requesterId),
-          eq(GroupMembership.groupId, groupId),
-          eq(GroupMembership.role, 'GROUP_MANAGER'),
-        ),
-      );
+  async remove(groupId: number, userId: number) {
+    const removedMember = await this.db.transaction(async (trx) => {
+      const [member] = await trx
+        .select()
+        .from(GroupMembership)
+        .where(
+          and(
+            eq(GroupMembership.userId, userId),
+            eq(GroupMembership.groupId, groupId),
+          ),
+        );
 
-    console.log(userId, groupId, canCreateGroup);
+      if (!member)
+        throw new NotFoundException(
+          `User with id #${userId} not found in this group!`,
+        );
 
-    if (!canCreateGroup) {
-      throw new ForbiddenException(
-        'You are not allowed to add members to this group.',
-      );
-    }
+      return await trx
+        .delete(GroupMembership)
+        .where(
+          and(
+            eq(GroupMembership.userId, userId),
+            eq(GroupMembership.groupId, groupId),
+          ),
+        )
+        .returning();
+    });
 
-    const removedMembers = this.db
-      .delete(GroupMembership)
-      .where(
-        and(
-          eq(GroupMembership.userId, userId),
-          eq(GroupMembership.groupId, groupId),
-        ),
-      )
-      .returning();
-
-    return removedMembers;
+    return removedMember;
   }
 }

@@ -3,6 +3,7 @@ import { integer, pgTable, timestamp, varchar } from "drizzle-orm/pg-core";
 import { Organization } from "./organization";
 import { Ticket } from "./ticket";
 import { primaryKey } from "drizzle-orm/pg-core";
+import { unique } from "drizzle-orm/pg-core";
 
 export const Priority = pgTable(
   "priority",
@@ -15,7 +16,7 @@ export const Priority = pgTable(
       .references(() => Organization.id),
 
     createdAt: timestamp().defaultNow().notNull(),
-  }
+  }, (t) => [unique().on(t.name, t.organizationId)]
 );
 
 export const PriorityRelations = relations(Priority, ({ many, one }) => ({

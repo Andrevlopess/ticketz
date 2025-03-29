@@ -11,13 +11,14 @@ import {
   Organization,
   OrganizationInsert,
   User,
-  Tenant
+  Tenant,
 } from '@ticketz/database';
 import { desc, eq, isNull, sql, and, getTableColumns } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { createInsertSchema, createUpdateSchema } from 'drizzle-zod';
 import { DrizzleAsyncProvider } from 'src/drizzle/drizzle.provider';
 import { ZodException } from 'src/handlers/zod.exception';
+import { createSlug } from 'src/utils/create-slug';
 import z from 'zod';
 
 const OrganizationUpdateSchema = createUpdateSchema(Organization);
@@ -31,9 +32,9 @@ export class OrganizationsService {
   ) {}
 
   async create(createOrganizationDto: OrganizationInsert) {
-    const schema = createInsertSchema(Organization);
+    const schema = createInsertSchema(Organization).omit({slug: true});
     const parsed = schema.safeParse(createOrganizationDto);
-
+    
     if (!parsed.success) throw new ZodException(parsed.error);
 
     const [organization] = await this.db.transaction(async (trx) => {
@@ -47,7 +48,13 @@ export class OrganizationsService {
           `Organization '${createOrganizationDto.name}' already exists!`,
         );
 
-      return trx.insert(Organization).values(createOrganizationDto).returning();
+      return trx
+        .insert(Organization)
+        .values({
+          ...createOrganizationDto,
+          slug: createSlug(createOrganizationDto.name),
+        })
+        .returning();
     });
 
     return organization;
@@ -60,12 +67,10 @@ export class OrganizationsService {
       })
       .from(Organization)
       .innerJoin(MemberShip, eq(MemberShip.organizationId, Organization.id))
-      .where(and(isNull(Organization.deletedAt), eq(MemberShip.userId, userId)))
       .orderBy(desc(Organization.createdAt));
   }
 
   async findOne(id: number, userId: number) {
-
     const [organization] = await this.db
       .select({
         ...getTableColumns(Organization),
@@ -78,7 +83,7 @@ export class OrganizationsService {
           eq(MemberShip.userId, userId),
           eq(MemberShip.organizationId, id),
         ),
-      )
+      );
 
     if (!organization)
       throw new NotFoundException(`Organization #${id} not found!`);
@@ -86,7 +91,6 @@ export class OrganizationsService {
   }
 
   async update(id: number, updateOrganizationDto: OrganizationUpdate) {
-
     const parsed = createUpdateSchema(Organization).safeParse(
       updateOrganizationDto,
     );

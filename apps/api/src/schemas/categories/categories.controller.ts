@@ -12,7 +12,7 @@ import { CategoriesService } from './categories.service';
 import type { CategoryInsert } from '@ticketz/database';
 import type { Request } from 'express';
 
-@Controller('categories')
+@Controller('organizations/:slug/categories')
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
@@ -22,13 +22,17 @@ export class CategoriesController {
   }
 
   @Get()
-  findAll(@Req() req: Request) {
-    return this.categoriesService.findAll(req.user.org.id);
+  findAll(
+    @Param('slug') slug: string, 
+    @Req() req: Request) {
+    return this.categoriesService.findAll(slug);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string, @Req() req: Request) {
-    return this.categoriesService.findOne(+id, req.user.org.id);
+  findOne(
+    @Param('slug') slug: string, 
+    @Param('id') id: string, @Req() req: Request) {
+    return this.categoriesService.findOne(+id, slug);
   }
 
   @Patch(':id')

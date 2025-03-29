@@ -21,7 +21,7 @@ import { Action } from 'rxjs/internal/scheduler/Action';
 import { PoliciesGuard } from 'src/auth/guards/policies.guard';
 import { CheckPolicies } from 'src/decorators/policies.decorator';
 
-@Controller('groups')
+@Controller('organizations/:slug/groups')
 export class GroupsController {
   constructor(private readonly groupsService: GroupsService) {}
 
@@ -29,26 +29,32 @@ export class GroupsController {
   // @CheckPolicies((ability: AppAbility) => ability.can('create', 'Group'))
   @Roles('ADMIN')
   @Post()
-  create(@Body() createGroupDto: GroupInsert, @Req() req: Request) {
-    return this.groupsService.create({
-      ...createGroupDto,
-      organizationId: req.user.org.id,
-    });
+  create(
+    @Param('slug') slug: string,
+    @Body() createGroupDto: GroupInsert,
+    @Req() req: Request,
+  ) {
+    return this.groupsService.create(createGroupDto);
   }
 
   // @Roles('USER')
   @Get()
-  findAll(@Req() req: Request) {
-    return this.groupsService.findAll(req.user.org.id);
+  findAll(@Param('slug') slug: string, @Req() req: Request) {
+    return this.groupsService.findAll(slug);
   }
+
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number, @Req() req: Request) {
-    return this.groupsService.findOne(id, req.user.org.id);
+  findOne(
+    @Param('slug') slug: string,
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: Request,
+  ) {
+    return this.groupsService.findOne(id, slug);
   }
 
   // @UseGuards(PoliciesGuard)
   // @CheckPolicies((ability: AppAbility) => ability.can('update', 'Group'))
-  
+
   @Roles('ADMIN')
   @Patch(':id')
   update(@Param('id', ParseIntPipe) id: number, @Body() updateGroupDto: any) {

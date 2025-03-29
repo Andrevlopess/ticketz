@@ -5,7 +5,13 @@ import {
   NotFoundException,
   Scope,
 } from '@nestjs/common';
-import { GlobalSchema, Group, GroupInsert, GroupMembership } from '@ticketz/database';
+import {
+  GlobalSchema,
+  Group,
+  GroupInsert,
+  GroupMembership,
+  Organization,
+} from '@ticketz/database';
 import { and, desc, eq, getTableColumns, isNull, sql } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { createInsertSchema, createUpdateSchema } from 'drizzle-zod';
@@ -30,8 +36,6 @@ export class GroupsService {
 
     if (!parsed.success) throw new ZodException(parsed.error);
 
-
-
     const [group] = await this.db.transaction(async (trx) => {
       const [alreadyExists] = await trx
         .select()
@@ -54,19 +58,24 @@ export class GroupsService {
     return group;
   }
 
-  async findAll(orgId: number) {
+  async findAll(slug: string) {
+    
     return this.db
-      .select()
+      .select({
+        ...getTableColumns(Group),
+      })
       .from(Group)
-      .where(eq(Group.organizationId, orgId))
+      .innerJoin(Organization, eq(Organization.id, Group.organizationId))
+      .where(eq(Organization.slug, slug))
       .orderBy(desc(Group.createdAt));
   }
 
-  async findOne(id: number, orgId: number) {
+  async findOne(id: number, slug: string) {
     const [group] = await this.db
       .select()
       .from(Group)
-      .where(and(eq(Group.organizationId, orgId), eq(Group.id, id)));
+      .innerJoin(Organization, eq(Organization.id, Group.organizationId))
+      .where(and(eq(Organization.slug, slug), eq(Group.id, id)));
 
     if (!group) throw new NotFoundException(`Group #${id} not found!`);
 

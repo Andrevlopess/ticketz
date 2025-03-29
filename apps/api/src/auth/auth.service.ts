@@ -11,7 +11,7 @@ import { UsersService } from '../schemas/users/users.service';
 export type RefreshTokenPayload = { sub: number };
 export type AccessTokenPayload = {
   sub: number;
-  org: { id: number; role: Role };
+  role: Role;
   grps?: {
     id: number;
     role: GroupRole;
@@ -36,10 +36,9 @@ export class AuthService {
 
     const payload: AccessTokenPayload = {
       sub: user.id,
-      org: {
-        id: user.memberships[0].organizationId,
-        role: user.memberships[0].role as Role,
-      },
+
+      role: user.memberships[0].role as Role,
+
       grps: user.groupMemberships.map((group) => ({
         id: group.groupId,
         role: group.role as GroupRole,
@@ -57,7 +56,9 @@ export class AuthService {
     }
 
     const accessToken = await this._generateAccessToken(validUser);
-    const refreshToken = await this._generateRefreshToken(validUser);
+    const refreshToken = await this._generateRefreshToken({
+      sub: validUser.sub,
+    });
 
     return {
       accessToken,
@@ -85,10 +86,7 @@ export class AuthService {
 
       const payload: AccessTokenPayload = {
         sub: user.id,
-        org: {
-          id: user.memberships[0].organizationId,
-          role: user.memberships[0].role as Role,
-        },
+        role: user.memberships[0].role as Role,
         grps: user.groupMemberships.map((group) => ({
           id: group.groupId,
           role: group.role as GroupRole,
@@ -99,7 +97,7 @@ export class AuthService {
         sub: tokenData.sub,
       });
 
-      const accessToken = await this._generateRefreshToken(payload);
+      const accessToken = await this._generateAccessToken(payload);
 
       return {
         accessToken,

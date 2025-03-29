@@ -9,10 +9,12 @@ import { Status } from "./status";
 import { Priority } from "./priority";
 import { Tag } from "./tag";
 import { Tenant } from "./tenant";
+import { unique } from "drizzle-orm/pg-core";
 
 export const Organization = table("organization", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   name: varchar({ length: 255 }).unique().notNull(),
+  slug: varchar().notNull(),
   logoUrl: varchar({ length: 255 }),
   description: varchar({ length: 255 }),
 
@@ -21,7 +23,7 @@ export const Organization = table("organization", {
     .references(() => Tenant.id),
 
   ...softDeleteTimestamps
-});
+}, (t) => [unique().on(t.slug, t.tenantId)]);
 
 export const OrganizationRelations = relations(
   Organization,

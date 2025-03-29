@@ -16,16 +16,17 @@ import { AppAbility } from '@ticketz/auth';
 import { PoliciesGuard } from 'src/auth/guards/policies.guard';
 import { CheckPolicies } from 'src/decorators/policies.decorator';
 
-@Controller('groups/:groupId/members')
+@Controller('organizations/:slug/groups/:groupId/members')
 export class GroupMembersController {
   constructor(private readonly groupMembersService: GroupMembersService) {}
 
   @Get()
   findMany(
+    @Param('slug') slug: string,
     @Param('groupId', ParseIntPipe) groupId: number,
     @Req() req: Request,
   ) {
-    return this.groupMembersService.findMany(groupId, req.user.org.id);
+    return this.groupMembersService.findMany(groupId, slug);
   }
 
   @UseGuards(PoliciesGuard)
@@ -38,8 +39,6 @@ export class GroupMembersController {
     @Body() userId: Pick<UserSelect, 'id'>,
     @Req() req: Request,
   ) {
-
-    return 'taliberado papai'
     return this.groupMembersService.add(req.user.sub, groupId, userId);
   }
   
@@ -56,8 +55,8 @@ export class GroupMembersController {
   removeTag(
     @Param('groupId', ParseIntPipe) groupId: number,
     @Param('userId', ParseIntPipe) userId: number,
-    @Req() req: Request,
+    // @Req() req: Request,/
   ) {
-    return this.groupMembersService.remove(req.user.sub, groupId, userId);
+    return this.groupMembersService.remove(groupId, userId);
   }
 }
