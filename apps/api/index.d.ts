@@ -3,6 +3,7 @@ import {
   OrganizationSelect,
   UserSelect,
 } from '@ticketz/database';
+import { AccessTokenPayload } from 'src/auth/auth.service';
 
 declare global {
   namespace Express {
@@ -10,16 +11,13 @@ declare global {
       user: {
         sub: number;
         role: Role;
-        grps?: {
-          id: number;
-          role: GroupRole;
-        }[];
       };
-      // getUserMembership: (orgId: number) => Promise<{
-      //   membership: MembershipSelect;
-      //   organization: OrganizationSelect;
-      // }>;
-      // getCurrentUserId: () => Promise<number>;
+      organization: OrganizationSelect,
+      getUserMembership: (slug: string) => Promise<{
+        membership: MembershipSelect;
+        organization: OrganizationSelect;
+      }>;
+      getCurrentUser: () => Promise<AccessTokenPayload>;
     }
   }
 }

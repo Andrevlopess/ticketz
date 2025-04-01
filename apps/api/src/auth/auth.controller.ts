@@ -73,14 +73,13 @@ export class AuthController {
     return { accessToken };
   }
 
-  @UseGuards(JwtAuthGuard)
-  // @Roles('ADMIN')
-  @Get('me')
+  @Get(':slug/me')
   getUserInfo(@Req() req: Request) {
     // return ability.can('read', 'Post')
     // return teste
     // req.user is infered on the jwt guard.
     // req.user is the token decoded data
-    return req.user;
+    return req.user
   }
+
 }

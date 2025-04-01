@@ -12,7 +12,6 @@ import {
   GroupMembership,
   MemberShip,
   Organization,
-  Profile,
   User,
   UserSelect,
 } from '@ticketz/database';
@@ -34,7 +33,6 @@ export class GroupMembersService {
   ) {}
 
   findMany(groupId: number, slug: string) {
-    const { id, userId, createdAt, ...profileData } = getTableColumns(Profile);
 
     const groupMembers = this.db.transaction(async (trx) => {
       const [group] = await trx
@@ -49,25 +47,24 @@ export class GroupMembersService {
       return this.db
         .select({
           id: User.id,
-          name: User.email,
-          ...profileData,
+          email: User.email,
+          role: GroupMembership.role
         })
         .from(GroupMembership)
         .innerJoin(User, eq(User.id, GroupMembership.userId))
-        .innerJoin(Profile, eq(Profile.userId, User.id))
         .where(eq(GroupMembership.groupId, groupId));
     });
 
     return groupMembers;
   }
 
-  async add(userId: number, groupId: number, user: Pick<UserSelect, 'id'>) {
+  async add(groupId: number, userId: number) {
     const [alreadyExists] = await this.db
       .select()
       .from(GroupMembership)
       .where(
         and(
-          eq(GroupMembership.userId, user.id),
+          eq(GroupMembership.userId, userId),
           eq(GroupMembership.groupId, groupId),
         ),
       );
@@ -82,7 +79,7 @@ export class GroupMembersService {
         MemberShip,
         eq(MemberShip.organizationId, Group.organizationId),
       )
-      .where(and(eq(MemberShip.userId, user.id), eq(Group.id, groupId)));
+      .where(and(eq(MemberShip.userId, userId), eq(Group.id, groupId)));
 
     if (!isMemberOfCompany)
       throw new BadRequestException(
@@ -91,7 +88,7 @@ export class GroupMembersService {
 
     const [newMember] = await this.db
       .insert(GroupMembership)
-      .values({ userId: user.id, groupId })
+      .values({ userId: userId, groupId })
       .onConflictDoNothing()
       .returning({
         userId: GroupMembership.userId,

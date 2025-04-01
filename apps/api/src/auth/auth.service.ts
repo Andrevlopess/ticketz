@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AuthInput, AuthResponse } from '@ticketz/types';
 // import { RoleEnum, Role } from '@ticketz/database';
-import { GroupRole, Role } from '@ticketz/database';
+import { GroupRole, MembershipSelect, Role } from '@ticketz/database';
 import bcrypt from 'bcrypt';
 import appConfig from 'src/config/app.config';
 import { UsersService } from '../schemas/users/users.service';
@@ -11,12 +11,15 @@ import { UsersService } from '../schemas/users/users.service';
 export type RefreshTokenPayload = { sub: number };
 export type AccessTokenPayload = {
   sub: number;
-  role: Role;
-  grps?: {
-    id: number;
-    role: GroupRole;
-  }[];
 };
+// export type AccessTokenPayload = {
+//   sub: number;
+//   role: Role;
+//   grps?: {
+//     id: number;
+//     role: GroupRole;
+//   }[];
+// };
 
 @Injectable()
 export class AuthService {
@@ -24,6 +27,10 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly usersService: UsersService,
   ) {}
+
+  // async getMembership(slug: string):Promise<MembershipSelect | null>{
+  //   const mem this.usersService.getMembership(slug)
+  // }
 
   async validateUser(data: AuthInput): Promise<AccessTokenPayload | null> {
     const user = await this.usersService.findUserByEmail(data.email);
@@ -36,13 +43,12 @@ export class AuthService {
 
     const payload: AccessTokenPayload = {
       sub: user.id,
+      // role: user.memberships[0].role as Role,
 
-      role: user.memberships[0].role as Role,
-
-      grps: user.groupMemberships.map((group) => ({
-        id: group.groupId,
-        role: group.role as GroupRole,
-      })),
+      // grps: user.groupMemberships.map((group) => ({
+      //   id: group.groupId,
+      //   role: group.role as GroupRole,
+      // })),
     };
 
     return payload;
@@ -86,11 +92,11 @@ export class AuthService {
 
       const payload: AccessTokenPayload = {
         sub: user.id,
-        role: user.memberships[0].role as Role,
-        grps: user.groupMemberships.map((group) => ({
-          id: group.groupId,
-          role: group.role as GroupRole,
-        })),
+        // role: user.memberships[0].role as Role,
+        // grps: user.groupMemberships.map((group) => ({
+        //   id: group.groupId,
+        //   role: group.role as GroupRole,
+        // })),
       };
 
       const refreshToken = await this._generateRefreshToken({

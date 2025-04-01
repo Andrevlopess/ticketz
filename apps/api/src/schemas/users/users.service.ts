@@ -6,25 +6,17 @@ import {
 } from '@nestjs/common';
 import {
   GlobalSchema,
-  GroupMembership,
   MemberShip,
   MembershipSelect,
   Organization,
+  OrganizationSelect,
   Role,
   User,
   UserInsert,
   UserSelect,
 } from '@ticketz/database';
-import { group } from 'console';
-import {
-  and,
-  eq,
-  getTableColumns,
-  isNotNull,
-  isNull,
-  or,
-  sql,
-} from 'drizzle-orm';
+import * as bcrypt from 'bcrypt';
+import { and, eq, getTableColumns, isNull, sql } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { createInsertSchema, createUpdateSchema } from 'drizzle-zod';
 import { DrizzleAsyncProvider } from 'src/drizzle/drizzle.provider';
@@ -50,10 +42,7 @@ export type UserUpdate = z.infer<typeof UserUpdateSchema>;
 //   ]
 // }
 interface UserWithMemberships
-  extends Omit<
-    UserSelect,
-    'defaultOrganizationId' | 'deletedAt' | 'updatedAt' | 'createdAt'
-  > {
+  extends Pick<UserSelect, 'id' | 'password' | 'email'> {
   memberships: {
     role: Role;
     organizationId: number;
@@ -80,24 +69,27 @@ export class UsersService {
     const parsed = userInsertSchema.safeParse(createUserDto);
 
     if (!parsed.success) {
-      throw new BadRequestException(parsed.error.issues[0]?.message, {
-        cause: new Error(),
-        description: parsed.error.issues[0]?.code,
-      });
+      throw new ZodException(parsed.error);
     }
 
-    const existingUser = await this.db.query.User.findFirst({
+    const existingEmail = await this.db.query.User.findFirst({
       where: eq(User.email, createUserDto.email),
     });
 
-    if (existingUser) {
-      throw new BadRequestException('This email is already in use!', {
-        cause: new Error(),
-        description: `unavailable_email`,
-      });
+    if (existingEmail) {
+      throw new BadRequestException('This email is already in use');
     }
 
-    const user = await this.db.insert(User).values(createUserDto).returning();
+    const { password, ...restOfCreateUserDto } = createUserDto;
+    const hashedPassword = bcrypt.hashSync(password, 10);
+
+    const user = await this.db
+      .insert(User)
+      .values({
+        password: hashedPassword,
+        ...restOfCreateUserDto,
+      })
+      .returning();
 
     return user;
   }
@@ -191,13 +183,11 @@ export class UsersService {
         },
       },
     });
-    
+
     return user;
   }
 
-  async findUserById(
-    id: number,
-  ): Promise<UserWithMemberships | undefined> {
+  async findUserById(id: number): Promise<UserWithMemberships | undefined> {
     const user = await this.db.query.User.findFirst({
       where: eq(User.id, id),
       columns: {
@@ -220,27 +210,24 @@ export class UsersService {
         },
       },
     });
-    
+
     return user;
   }
 
-  // async getMembership(
-  //   userId: number,
-  //   organizationId: number,
-  // ): Promise<MembershipSelect | undefined> {
-  //   const [membership] = await this.db
-  //     .select({
-  //       ...getTableColumns(MemberShip),
-  //     })
-  //     .from(MemberShip)
-  //     .innerJoin(Organization, eq(MemberShip.organizationId, Organization.id))
-  //     .where(
-  //       and(
-  //         eq(MemberShip.userId, userId),
-  //         eq(MemberShip.organizationId, organizationId),
-  //       ),
-  //     );
+  async getMembership(userId: number, slug: string): Promise<
+    | {
+        membership: MembershipSelect;
+        organization: OrganizationSelect;
+      }
+    | undefined
+  > {
+    const [membership] = await this.db
+      .select()
+      .from(MemberShip)
+      .innerJoin(Organization, eq(MemberShip.organizationId, Organization.id))
+      .where(
+        and(eq(Organization.slug, slug), eq(MemberShip.userId, userId)));
 
-  //   return membership;
-  // }
+    return membership;
+  }
 }

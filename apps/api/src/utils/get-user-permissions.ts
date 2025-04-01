@@ -1,10 +1,11 @@
 import { defineAbilityFor, User, userSchema } from '@ticketz/auth';
+import { Role } from '@ticketz/database';
 import { AccessTokenPayload } from 'src/auth/auth.service';
 
-export function getUserPermissions(authUser: AccessTokenPayload) {
+export function getUserPermissions(userId: number, role: Role) {
   const user = userSchema.parse({
-    id: authUser.sub,
-    role: authUser.role,
+    id: userId,
+    role,
   });
 
   const ability = defineAbilityFor(user);

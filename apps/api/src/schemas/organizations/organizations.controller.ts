@@ -1,23 +1,15 @@
 import {
+  Body,
   Controller,
   Get,
-  Post,
-  Body,
-  Patch,
   Param,
-  Delete,
-  Req,
-  UnauthorizedException,
-  ForbiddenException,
-  NotFoundException,
-  UseGuards,
+  Post,
+  Req
 } from '@nestjs/common';
-import { OrganizationsService } from './organizations.service';
 import type { OrganizationInsert } from '@ticketz/database';
 import type { Request } from 'express';
 import { AuthService } from 'src/auth/auth.service';
-import { Roles } from 'src/decorators/roles.decorator';
-import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { OrganizationsService } from './organizations.service';
 
 @Controller('organizations')
 // @Roles(['admin'])
@@ -38,9 +30,16 @@ export class OrganizationsController {
     return this.organizationsService.findMany(req.user.sub);
   }
 
-  @Get(':id')
-  async findOne(@Req() req: Request, @Param('id') id: string) {
-    return this.organizationsService.findOne(+id, req.user.sub);
+  // @Get(':id')
+  // async findOne(@Req() req: Request, @Param('id') id: string) {
+  //   return this.organizationsService.findOne(+id, req.user.sub);
+  // }
+
+  
+  @Get(':slug')
+  getMembership(@Req() req: Request, @Param('slug') slug: string){
+
+    return req.getUserMembership(slug)
   }
 
   // @Patch(':id')

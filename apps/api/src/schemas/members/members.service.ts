@@ -1,9 +1,13 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   GlobalSchema,
   MemberShip,
   Organization,
-  Profile,
   User,
   UserSelect,
 } from '@ticketz/database';
@@ -18,59 +22,73 @@ export class MembersService {
     private db: NodePgDatabase<typeof GlobalSchema>,
   ) {}
 
-  findMany(slug: string) {
-    const { id, userId, createdAt, ...profileData } = getTableColumns(Profile);
-
+  findMany(orgId: number) {
     const insertedTags = this.db
       .select({
         id: User.id,
-        name: User.email,
-        ...profileData,
+        email: User.email,
+        role: MemberShip.role
       })
       .from(MemberShip)
       .innerJoin(User, and(eq(User.id, MemberShip.userId)))
-      .innerJoin(Profile, eq(Profile.userId, User.id))
-      .innerJoin(Organization, eq(Organization.id, MemberShip.organizationId))
-      .where(eq(Organization.slug, slug));
+      .where(eq(MemberShip.organizationId, orgId));
 
     return insertedTags;
   }
 
-  add(organizationId: number, users: Pick<UserSelect, 'id'>[]) {
-    const data = users.map((user) => ({ userId: user.id, organizationId }));
+  async add(organizationId: number, userId: number) {
+    console.log(organizationId, userId);
 
-    const insertedTags = this.db
-      .insert(MemberShip)
-      .values(data)
-      .onConflictDoNothing()
-      .returning({
-        userId: MemberShip.userId,
-      });
+    const [isMember] = await this.db
+      .select()
+      .from(MemberShip)
+      .where(
+        and(
+          eq(MemberShip.userId, userId),
+          eq(MemberShip.organizationId, organizationId),
+        ),
+      );
 
-    return insertedTags;
+    if (isMember)
+      throw new BadRequestException(`User #${userId} is already a member!`);
+
+    const newMember = await this.db.transaction(async (trx) => {
+      const [organization] = await trx
+        .select()
+        .from(Organization)
+        .where(eq(Organization.id, organizationId));
+
+      if (!organization) {
+        throw new NotFoundException(
+          `Organization with slug ${organizationId} not found!`,
+        );
+      }
+
+      return await this.db
+        .insert(MemberShip)
+        .values({
+          userId: userId,
+          organizationId: organization.id
+        })
+        .returning({
+          userId: MemberShip.userId,
+        });
+    });
+
+    return newMember;
   }
 
-  async findOne(memberId: number, slug: string) {
-    const {
-      id,
-      userId: profileUserId,
-
-      createdAt,
-
-      ...profileData
-    } = getTableColumns(Profile);
-
+  async findOne(memberId: number, organizationId: number) {
     const [user] = await this.db
-      .select({
-        id: User.id,
-        name: User.email,
-        ...profileData,
-      })
+      .select()
       .from(MemberShip)
-      .innerJoin(User, and(eq(User.id, MemberShip.userId)))
-      .innerJoin(Profile, eq(Profile.userId, User.id))
-      .innerJoin(Organization, eq(Organization.id, MemberShip.organizationId))
-      .where(and(eq(Organization.slug, slug), eq(MemberShip.userId, memberId)));
+      // .innerJoin(User, eq(User.id, MemberShip.userId))
+      .where(
+        and(
+          eq(MemberShip.organizationId, organizationId),
+          eq(MemberShip.userId, memberId),
+        ),
+      );
 
     if (!user) throw new NotFoundException(`User #${memberId} not found!`);
     return user;

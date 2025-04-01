@@ -23,6 +23,8 @@ export class PoliciesGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    console.log('......EXECUTED POLICIES GUARD......');
+
     const policyHandlers =
       this.reflector.get<PolicyHandler[]>(
         CHECK_POLICIES_KEY,
@@ -31,8 +33,13 @@ export class PoliciesGuard implements CanActivate {
 
     const request = context.switchToHttp().getRequest() as Request;
 
-    const ability = getUserPermissions(request.user);
-    
+    if (!request.params.slug) return false;
+
+    const user = await request.getCurrentUser();
+    const { membership } = await request.getUserMembership(request.params.slug);
+
+    const ability = getUserPermissions(user.sub, membership.role);
+
     // first try to check if the user has the permission in the app role (ADMIN | USER)
     // if not, check if the user has the permission in the group role (GROUP_MANAGER | MEMBER)
     const hasAppRolePermission = policyHandlers.every((handler) =>
@@ -40,14 +47,14 @@ export class PoliciesGuard implements CanActivate {
     );
 
     if (!hasAppRolePermission) {
-      const role = this.extractGroupRoleFromRequest(request);
+      // const role = this.extractGroupRoleFromRequest(request);
 
-      if (!role) return false;
+      // if (!role) return false;
 
-      const ability = getMemberPermissions({
-        id: request.user.sub,
-        role: role,
-      });
+      // const ability = getMemberPermissions({
+      //   id: request.user.sub,
+      //   role: role,
+      // });
 
       const hasGroupRolePermission = policyHandlers.every((handler) =>
         this.execPolicyHandler(handler, ability),
@@ -59,12 +66,12 @@ export class PoliciesGuard implements CanActivate {
     return hasAppRolePermission;
   }
 
-  private extractGroupRoleFromRequest(request: Request): GroupRole | null {
-    if (!request.user?.grps || !request.params?.groupId) return null;
+  // private extractGroupRoleFromRequest(request: Request): GroupRole | null {
+  //   if (!request.user?.grps || !request.params?.groupId) return null;
 
-    const groupId = +request.params.groupId;
-    return request.user.grps.find((group) => group.id === groupId)?.role;
-  }
+  //   const groupId = +request.params.groupId;
+  //   return request.user.grps.find((group) => group.id === groupId)?.role;
+  // }
 
   private execPolicyHandler(handler: PolicyHandler, ability: AppAbility) {
     if (typeof handler === 'function') {

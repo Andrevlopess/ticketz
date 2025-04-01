@@ -14,6 +14,6 @@ export const permissions: Record<Role, PermissionsByRole> = {
     // can('read', 'Group');
   },
   USER(user, { can, cannot }) {
-    can("read", "Group");
+    cannot("read", "Group");
   },
 };

@@ -11,28 +11,24 @@ import { GroupMembership } from "./group-membership";
 export const User = table("user", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   email: varchar({ length: 255 }).notNull().unique(),
+  password: varchar().notNull(),
 
-  password: varchar(),
-  defaultOrganizationId: integer()
-    .notNull()
-    .default(1)
-    .references(() => Organization.id),
+  name: varchar().notNull(),
+
+  photoUrl: varchar(),
+  phone: varchar(),
+  jobTitle: varchar(),
 
   ...softDeleteTimestamps,
 });
 
 export const UserRelations = relations(User, ({ one, many }) => ({
-  // profile: one(Profile),
   memberships: many(MemberShip),
   notes: many(TicketNote, { relationName: "notesOnTicket" }),
   groupMemberships: many(GroupMembership),
   assignees: many(TicketAssignments, { relationName: "assigneesOnTicket" }),
   assigner: many(TicketAssignments, { relationName: "assignersOnTicket" }),
-  createdTickets: many(Ticket),
-  defaultOrganization: one(Organization, {
-    fields: [User.defaultOrganizationId],
-    references: [Organization.id],
-  }),
+  createdTickets: many(Ticket)
 }));
 
 export type UserSelect = typeof User.$inferSelect;

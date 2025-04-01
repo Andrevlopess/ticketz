@@ -5,37 +5,58 @@
 // } from '@nestjs/common';
 // import { JwtService } from '@nestjs/jwt';
 // import { NextFunction, Request, Response } from 'express';
-// import { AccessTokenPayload, AuthService } from 'src/auth/auth.service';
+// import { AccessTokenPayload } from 'src/auth/auth.service';
+// import { UsersService } from 'src/schemas/users/users.service';
 
 // @Injectable()
 // export class AuthMiddleware implements NestMiddleware {
 //   constructor(
-//     private readonly authService: AuthService,
+//     private readonly userService: UsersService,
 //     private jwtService: JwtService,
 //   ) {}
 
 //   use(req: Request, res: Response, next: NextFunction) {
+//     console.log('......EXECUTED AUTH MIDDLEWARE......');
 
-//     // req.getUserMembership = async (id: number) => {
-//     //   const userId = await req.getCurrentUserId();
+//     req.getCurrentUser = async () => {
+//       const token = this.extractTokenFromHeader(req);
+//       if (!token) {
+//         throw new UnauthorizedException('Token not provided!');
+//       }
 
-//     //   const member = await this.authService.getMembership(userId, id);
+//       try {
+//         const payload =
+//           await this.jwtService.verifyAsync<AccessTokenPayload>(token);
 
-//     //   if (!member) {
-//     //     throw new UnauthorizedException(
-//     //       `You're not a member of this organization.`,
-//     //     );
-//     //   }
-//     //   const { organization, membership } = member;
+//         return payload;
+//       } catch {
+//         throw new UnauthorizedException('Invalid token provided!');
+//       }
+//     };
 
-//     //   return {
-//     //     organization,
-//     //     membership,
-//     //   };
-//     // };
+//     req.getUserMembership = async (slug: string) => {
+//       const user = await req.getCurrentUser();
+
+//       const member = await this.userService.getMembership(user.sub, slug);
+
+//       if (!member) {
+//         throw new UnauthorizedException(
+//           `You're not a member of this organization.`,
+//         );
+//       }
+
+//       const { organization, membership } = member;
+
+//       return {
+//         organization,
+//         membership,
+//       };
+//     };
+
 
 //     next();
 //   }
+
 
 //   private extractTokenFromHeader(request: Request): string | undefined {
 //     const [type, token] = request.headers.authorization?.split(' ') ?? [];

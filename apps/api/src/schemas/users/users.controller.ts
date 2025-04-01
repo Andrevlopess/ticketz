@@ -1,16 +1,15 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
 } from '@nestjs/common';
-import { UsersService } from './users.service';
-import type { UserUpdate } from './users.service';
 import type { UserInsert } from '@ticketz/database';
-import { Public } from 'src/decorators/public.decorator';
+import type { UserUpdate } from './users.service';
+import { UsersService } from './users.service';
 
 @Controller('users')
 export class UsersController {

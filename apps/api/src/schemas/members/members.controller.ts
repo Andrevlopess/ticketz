@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { UserSelect } from '@ticketz/database';
 import type { Request } from 'express';
+import { Roles } from 'src/decorators/roles.decorator';
 import { MembersService } from './members.service';
 
 @Controller('organizations/:slug/members')
@@ -17,25 +18,25 @@ export class MembersController {
   constructor(private readonly MembersService: MembersService) {}
 
   @Get()
-  findMany(@Param('slug') slug: string, @Req() req: Request) {
-    return this.MembersService.findMany(slug);
+  @Roles('ADMIN')
+  async findMany(@Param('slug') slug: string, @Req() req: Request) {
+    return this.MembersService.findMany(req.organization.id);
   }
 
   @Get(':memberId')
   findOne(
-    @Param('slug') slug: string,
     @Param('memberId', ParseIntPipe) memberId: number,
     @Req() req: Request,
   ) {
-    return this.MembersService.findOne(memberId, slug);
+    console.log(req.organization);
+
+    return this.MembersService.findOne(memberId, req.organization.id);
   }
 
+  @Roles('ADMIN')
   @Post()
-  addMember(
-    // @Param('id', ParseIntPipe) id: number,
-    @Body() users: Pick<UserSelect, 'id'>[],
-  ) {
-    // return thi/s.MembersService.add(users);
+  addMember(@Req() req: Request, @Body() user: Pick<UserSelect, 'id'>) {
+    return this.MembersService.add(req.organization.id, user.id);
   }
 
   // @Patch()
