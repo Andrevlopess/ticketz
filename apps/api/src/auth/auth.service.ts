@@ -114,6 +114,12 @@ export class AuthService {
     }
   }
 
+
+  async resetPasswords(){
+  return await this.usersService.resetPasswords()
+  }
+
+
   private async _generateAccessToken(
     payload: AccessTokenPayload,
   ): Promise<string> {

@@ -59,6 +59,11 @@ export class GroupMembersService {
   }
 
   async add(groupId: number, userId: number) {
+
+    /* Steps to check:
+    *  Check if user is already a member of the group;
+    *  Check if user ia a member of the company of the group;
+    */ 
     const [alreadyExists] = await this.db
       .select()
       .from(GroupMembership)

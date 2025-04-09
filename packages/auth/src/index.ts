@@ -5,16 +5,17 @@ import {
   MongoAbility,
 } from "@casl/ability";
 import z from "zod";
+import { GroupMember } from "./models/group-member";
 import { User } from "./models/user";
 import { permissions } from "./permissions/app-permissions";
-import { groupSubject } from "./subjects/group";
-import { userSubject } from "./subjects/user";
-import { GroupMember } from "./models/group-member";
 import { groupPermissions } from "./permissions/group-permissions";
+import { groupSubject } from "./subjects/group";
+import { groupMemberSubject } from "./subjects/group-member";
+import { userSubject } from "./subjects/user";
 
 export * from "./models/group";
-export * from "./models/user";
 export * from "./models/group-member";
+export * from "./models/user";
 
 const appAbilitiesSchema = z.union([
   userSubject,
@@ -43,10 +44,12 @@ export function defineAbilityFor(user: User) {
 
   return ability;
 }
-// ================ GROUP ABILITIES ================  //
 
+// ================ GROUP ABILITIES ================  //
 const groupAbilitiesSchema = z.union([
-  userSubject,
+  // userSubject,
+  // userSubject,
+  groupMemberSubject,
   groupSubject,
   z.tuple([z.literal("manage"), z.literal("all")]),
 ]);
@@ -54,7 +57,8 @@ const groupAbilitiesSchema = z.union([
 type GroupAbilities = z.infer<typeof groupAbilitiesSchema>;
 export type GroupAbility = MongoAbility<GroupAbilities>;
 
-export const createGroupAbility = createMongoAbility as CreateAbility<GroupAbility>;
+export const createGroupAbility =
+  createMongoAbility as CreateAbility<GroupAbility>;
 
 export function defineGroupAbilityFor(member: GroupMember) {
   const builder = new AbilityBuilder(createGroupAbility);

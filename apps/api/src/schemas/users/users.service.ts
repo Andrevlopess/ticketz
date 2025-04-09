@@ -6,6 +6,9 @@ import {
 } from '@nestjs/common';
 import {
   GlobalSchema,
+  Group,
+  GroupMembership,
+  GroupMembershipSelect,
   MemberShip,
   MembershipSelect,
   Organization,
@@ -214,7 +217,10 @@ export class UsersService {
     return user;
   }
 
-  async getMembership(userId: number, slug: string): Promise<
+  async getMembership(
+    userId: number,
+    slug: string,
+  ): Promise<
     | {
         membership: MembershipSelect;
         organization: OrganizationSelect;
@@ -225,9 +231,32 @@ export class UsersService {
       .select()
       .from(MemberShip)
       .innerJoin(Organization, eq(MemberShip.organizationId, Organization.id))
-      .where(
-        and(eq(Organization.slug, slug), eq(MemberShip.userId, userId)));
+      .where(and(eq(Organization.slug, slug), eq(MemberShip.userId, userId)));
 
     return membership;
+  }
+
+  async getGroupMembership(
+    userId: number,
+    groupId: number,
+  ): Promise<GroupMembershipSelect | undefined> {
+    const [membership] = await this.db
+      .select()
+      .from(GroupMembership)
+      .where(
+        and(
+          eq(GroupMembership.groupId, groupId),
+          eq(GroupMembership.userId, userId),
+        ),
+      );
+
+    return membership;
+  }
+
+  async resetPasswords() {
+    const hashedPassword = bcrypt.hashSync('123456', 10);
+
+    const user = await this.db.update(User).set({ password: hashedPassword });
+    return user;
   }
 }

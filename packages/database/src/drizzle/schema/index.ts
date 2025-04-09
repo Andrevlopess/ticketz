@@ -3,7 +3,6 @@ export * from "./category";
 export * from "./group";
 export * from "./organization";
 export * from "./priority";
-export * from "./profile";
 export * from "./status";
 export * from "./tag";
 export * from "./ticket";

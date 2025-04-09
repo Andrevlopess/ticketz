@@ -1,17 +1,24 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  CanActivate,
+  ExecutionContext,
+  Injectable
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { AppAbility, defineAbilityFor } from '@ticketz/auth';
-import { GroupRole } from '@ticketz/database';
+import { GroupAbility } from '@ticketz/auth';
 import { Request } from 'express';
 import { CHECK_POLICIES_KEY } from 'src/decorators/policies.decorator';
+import { UsersService } from 'src/schemas/users/users.service';
 import { getMemberPermissions } from 'src/utils/get-member-permissions';
-import { getUserPermissions } from 'src/utils/get-user-permissions';
+
+
+export type Abilities = GroupAbility
 
 interface IPolicyHandler {
-  handle(ability: AppAbility): boolean;
+  handle(ability: Abilities): boolean;
 }
 
-type PolicyHandlerCallback = (ability: AppAbility) => boolean;
+type PolicyHandlerCallback = (ability: Abilities) => boolean;
 
 export type PolicyHandler = IPolicyHandler | PolicyHandlerCallback;
 
@@ -19,6 +26,7 @@ export type PolicyHandler = IPolicyHandler | PolicyHandlerCallback;
 export class PoliciesGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
+    private userService: UsersService,
     // private caslAbilityFactory: CaslAbilityFactory,
   ) {}
 
@@ -35,45 +43,57 @@ export class PoliciesGuard implements CanActivate {
 
     if (!request.params.slug) return false;
 
-    const user = await request.getCurrentUser();
-    const { membership } = await request.getUserMembership(request.params.slug);
+    
+    // const ability = getUserPermissions(request.user.sub, request.user.role);
 
-    const ability = getUserPermissions(user.sub, membership.role);
+    // // first try to check if the user has the permission in the app role (ADMIN | USER)
+    // // if not, check if the user has the permission in the group role (GROUP_MANAGER | MEMBER)
+    // const hasAppRolePermission = policyHandlers.every((handler) =>
+    //   this.execPolicyHandler(handler, ability),
+    // )
 
-    // first try to check if the user has the permission in the app role (ADMIN | USER)
-    // if not, check if the user has the permission in the group role (GROUP_MANAGER | MEMBER)
-    const hasAppRolePermission = policyHandlers.every((handler) =>
-      this.execPolicyHandler(handler, ability),
-    );
+    // if (!hasAppRolePermission) {
+      if (!request.params.groupId) {
+        throw new BadRequestException('Slug not provided!');
+      }
 
-    if (!hasAppRolePermission) {
-      // const role = this.extractGroupRoleFromRequest(request);
+      // const member = null
+      const member = await this.userService.getGroupMembership(
+        request.user.sub,
+        +request.params.groupId,
+      );
 
-      // if (!role) return false;
+      // if (!member) {
+      //   throw new ForbiddenException(
+      //     `You're not a member of this group.`,
+      //   );
+      // }
 
-      // const ability = getMemberPermissions({
-      //   id: request.user.sub,
-      //   role: role,
-      // });
+      const ability = getMemberPermissions({
+        id: request.user.sub,
+        role: member?.role ?? 'ANONYMOUS',
+      }) 
 
+      console.log({
+        id: request.user.sub,
+        role: member?.role ?? 'ANONYMOUS',
+      });
+      
       const hasGroupRolePermission = policyHandlers.every((handler) =>
         this.execPolicyHandler(handler, ability),
       );
 
+      if(!hasGroupRolePermission) {
+        console.log(`${member?.role ?? 'ANONYMOUS'}'s group members are not allowed to ${policyHandlers.map(handler => handler).join(', ')} `);
+      }
+
       return hasGroupRolePermission;
     }
 
-    return hasAppRolePermission;
-  }
-
-  // private extractGroupRoleFromRequest(request: Request): GroupRole | null {
-  //   if (!request.user?.grps || !request.params?.groupId) return null;
-
-  //   const groupId = +request.params.groupId;
-  //   return request.user.grps.find((group) => group.id === groupId)?.role;
+  //   return hasAppRolePermission;
   // }
 
-  private execPolicyHandler(handler: PolicyHandler, ability: AppAbility) {
+  private execPolicyHandler(handler: PolicyHandler, ability: Abilities) {
     if (typeof handler === 'function') {
       return handler(ability);
     }

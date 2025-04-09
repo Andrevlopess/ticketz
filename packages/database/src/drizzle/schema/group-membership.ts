@@ -34,3 +34,6 @@ export const GroupMembershipRelations = relations(
     }),
   })
 );
+
+export type GroupMembershipSelect = typeof GroupMembership.$inferSelect;
+export type GroupMembershipInser = typeof GroupMembership.$inferInsert;

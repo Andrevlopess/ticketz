@@ -7,22 +7,27 @@ import {
   ParseIntPipe,
   Post,
   Req,
+  UseGuards,
 } from '@nestjs/common';
 import { UserSelect } from '@ticketz/database';
 import type { Request } from 'express';
 import { Roles } from 'src/decorators/roles.decorator';
 import { MembersService } from './members.service';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
 
 @Controller('organizations/:slug/members')
 export class MembersController {
   constructor(private readonly MembersService: MembersService) {}
 
-  @Get()
+  @UseGuards(RolesGuard)
   @Roles('ADMIN')
+  @Get()
   async findMany(@Param('slug') slug: string, @Req() req: Request) {
     return this.MembersService.findMany(req.organization.id);
   }
 
+  @UseGuards(RolesGuard)
+  @Roles('ADMIN')
   @Get(':memberId')
   findOne(
     @Param('memberId', ParseIntPipe) memberId: number,
@@ -33,6 +38,7 @@ export class MembersController {
     return this.MembersService.findOne(memberId, req.organization.id);
   }
 
+  @UseGuards(RolesGuard)
   @Roles('ADMIN')
   @Post()
   addMember(@Req() req: Request, @Body() user: Pick<UserSelect, 'id'>) {

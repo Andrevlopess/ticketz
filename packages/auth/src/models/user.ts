@@ -1,4 +1,4 @@
-import { GroupRoleEnumSchema, RoleEnumSchema } from '@ticketz/database'
+import { RoleEnumSchema } from '@ticketz/database'
 import { z } from 'zod'
 
 

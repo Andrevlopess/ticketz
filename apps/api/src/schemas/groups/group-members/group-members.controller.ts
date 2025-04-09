@@ -8,20 +8,28 @@ import {
   ParseIntPipe,
   Post,
   Req,
-  UnauthorizedException,
-  UseGuards,
+  UseGuards
 } from '@nestjs/common';
+import { GroupAbility } from '@ticketz/auth';
 import { UserSelect } from '@ticketz/database';
 import type { Request } from 'express';
-import { GroupMembersService } from './group-members.service';
-import { AppAbility } from '@ticketz/auth';
 import { PoliciesGuard } from 'src/auth/guards/policies.guard';
 import { CheckPolicies } from 'src/decorators/policies.decorator';
+import { GroupMembersService } from './group-members.service';
 
 @Controller('organizations/:slug/groups/:groupId/members')
 export class GroupMembersController {
   constructor(private readonly groupMembersService: GroupMembersService) {}
 
+  // @UseGuards(PoliciesGuard)
+  // @CheckPolicies((ability: AppAbility) =>
+  //   ability.can('read', 'Group'),
+  // )
+
+  @UseGuards(PoliciesGuard)
+  @CheckPolicies((ability: GroupAbility) =>
+    ability.can('read', 'GroupMembers'),
+  )
   @Get()
   findMany(
     @Param('slug') slug: string,
@@ -31,16 +39,24 @@ export class GroupMembersController {
     return this.groupMembersService.findMany(groupId, slug);
   }
 
-  // @UseGuards(PoliciesGuard)
-  // @CheckPolicies((ability: AppAbility) =>
-  //   ability.can('invite_members', 'Group'),
-  // )
+  @UseGuards(PoliciesGuard)
+  @CheckPolicies((ability: GroupAbility) =>
+    ability.can('create', 'GroupMembers'),
+  )
   @Post()
   addMember(
     @Param('groupId', ParseIntPipe) groupId: number,
     @Body() user: Pick<UserSelect, 'id'>,
     @Req() req: Request,
   ) {
+
+    // return {
+    //   user: req.user,
+    //   org: req.organization,
+    // }
+
+    return 'teste'
+
     return this.groupMembersService.add(groupId, user.id);
   }
 

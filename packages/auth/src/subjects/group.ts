@@ -8,8 +8,8 @@ export const groupSubject = z.tuple([
     z.literal('update'),
     z.literal('create'),
     z.literal('delete'),
-    z.literal('invite_members'),
-    z.literal('remove_members'),
+    // z.literal('add_members'),
+    // z.literal('remove_members'),
   ]),
   z.union([z.literal('Group'), groupSchema]),
 ]);

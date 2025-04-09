@@ -13,7 +13,6 @@ import type { AuthInput } from '@ticketz/types';
 import type { Request, Response } from 'express';
 import { Public } from 'src/decorators/public.decorator';
 import { AuthService } from './auth.service';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -75,11 +74,15 @@ export class AuthController {
 
   @Get(':slug/me')
   getUserInfo(@Req() req: Request) {
-    // return ability.can('read', 'Post')
-    // return teste
-    // req.user is infered on the jwt guard.
-    // req.user is the token decoded data
     return req.user
+  }
+
+
+  
+  @Post(':slug/reset_passwords')
+  resetPasswords(@Req() req: Request) {
+
+    return this.authService.resetPasswords()
   }
 
 }

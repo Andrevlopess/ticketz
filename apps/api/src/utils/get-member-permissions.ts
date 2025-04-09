@@ -1,16 +1,16 @@
 import {
   defineGroupAbilityFor,
-  memberSchema
+  GroupMember,
+  groupMemberSchema,
 } from '@ticketz/auth';
-import { GroupRole } from '@ticketz/database';
 
-export function getMemberPermissions(member: { id: number; role: GroupRole }) {
+export function getMemberPermissions(member: { id: number; role: GroupMember['role'] }) {
 
-  const authMember = memberSchema.parse({
+  const authMember = groupMemberSchema.parse({
     id: member.id,
     role: member.role,
   });
-
+  
   
   const ability = defineGroupAbilityFor(authMember);
 
