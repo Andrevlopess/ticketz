@@ -22,7 +22,7 @@ export class JwtAuthGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    console.log('......EXECUTED JWT-AUTH GUARD......');
+    console.log('......EXECUTED JWT GUARD......');
 
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
@@ -40,37 +40,14 @@ export class JwtAuthGuard implements CanActivate {
     }
 
     let payload: AccessTokenPayload;
-    
+
     try {
       payload = this.jwtService.verify<AccessTokenPayload>(token);
     } catch (e) {
-
       throw new UnauthorizedException('Invalid token provided!');
     }
 
-
-    if (!request.params.slug) {
-      throw new BadRequestException('Slug not provided!');
-    }
-
-    const member = await this.userService.getMembership(
-      payload.sub,
-      request.params.slug,
-    );
-
-    if (!member) {
-      throw new UnauthorizedException(
-        `You're not a member of this organization.`,
-      );
-    }
-
-    const { organization, membership } = member;
-
-    request.organization = organization;
-    request.user = {
-      ...payload,
-      role: membership.role,
-    };
+    // request.user = payload;
 
     return true;
   }

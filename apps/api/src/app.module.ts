@@ -13,7 +13,6 @@ import { OrganizationsModule } from './schemas/organizations/organizations.modul
 import { TagsModule } from './schemas/tags/tags.module';
 import { TicketsModule } from './schemas/tickets/tickets.module';
 import { UsersModule } from './schemas/users/users.module';
-import { PoliciesGuard } from './auth/guards/policies.guard';
 // import { AuthMiddleware } from './middlewares/auth.middleware';
 
 @Module({
@@ -48,8 +47,4 @@ import { PoliciesGuard } from './auth/guards/policies.guard';
   ],
 })
 export class AppModule {}
-// export class AppModule implements NestModule {
-//   configure(consumer: MiddlewareConsumer) {
-//     consumer.apply(AuthMiddleware).forRoutes('*');
-//   }
-// }
+

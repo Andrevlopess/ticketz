@@ -13,11 +13,12 @@ declare global {
         role: Role;
       };
       organization: OrganizationSelect,
-      getUserMembership: (slug: string) => Promise<{
-        membership: MembershipSelect;
-        organization: OrganizationSelect;
-      }>;
-      getCurrentUser: () => Promise<AccessTokenPayload>;
+      accessToken: AccessTokenPayload;
+      // getUserMembership: (slug: string) => Promise<{
+      //   membership: MembershipSelect;
+      //   organization: OrganizationSelect;
+      // }>;
+      // getCurrentUser: () => Promise<AccessTokenPayload>;
     }
   }
 }

@@ -61,12 +61,14 @@ export class OrganizationsService {
   }
 
   async findMany(userId: number) {
+
     return this.db
       .select({
         ...getTableColumns(Organization),
       })
       .from(Organization)
       .innerJoin(MemberShip, eq(MemberShip.organizationId, Organization.id))
+      .where(eq(MemberShip.userId, userId))
       .orderBy(desc(Organization.createdAt));
   }
 

@@ -10,6 +10,7 @@ import type { OrganizationInsert } from '@ticketz/database';
 import type { Request } from 'express';
 import { AuthService } from 'src/auth/auth.service';
 import { OrganizationsService } from './organizations.service';
+import { Public } from 'src/decorators/public.decorator';
 
 @Controller('organizations')
 // @Roles(['admin'])
@@ -17,7 +18,7 @@ import { OrganizationsService } from './organizations.service';
 export class OrganizationsController {
   constructor(
     private readonly organizationsService: OrganizationsService,
-    private authService: AuthService,
+    // private authService: AuthService,
   ) {}
 
   @Post()
@@ -25,6 +26,7 @@ export class OrganizationsController {
     return this.organizationsService.create(createOrganizationDto);
   }
 
+  // @Public()
   @Get()
   findAll(@Req() req: Request) {
     return this.organizationsService.findMany(req.user.sub);
@@ -36,11 +38,10 @@ export class OrganizationsController {
   // }
 
   
-  @Get(':slug')
-  getMembership(@Req() req: Request, @Param('slug') slug: string){
-
-    return req.getUserMembership(slug)
-  }
+  // @Get(':slug')
+  // getMembership(@Req() req: Request, @Param('slug') slug: string){
+  //   // return req.getUserMembership(slug)
+  // }
 
   // @Patch(':id')
   // async update(

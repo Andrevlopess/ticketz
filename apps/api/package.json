@@ -28,6 +28,7 @@
     "@nestjs/mapped-types": "*",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.1",
+    "@nestjs/swagger": "^11.1.1",
     "@ticketz/auth": "workspace:*",
     "@ticketz/database": "workspace:*",
     "bcrypt": "^5.1.1",

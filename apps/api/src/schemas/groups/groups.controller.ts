@@ -2,24 +2,22 @@ import {
   Body,
   Controller,
   Delete,
-  ForbiddenException,
   Get,
   Param,
   ParseIntPipe,
   Patch,
   Post,
   Req,
-  UseGuards,
+  UseGuards
 } from '@nestjs/common';
 import type { GroupInsert } from '@ticketz/database';
 import type { Request } from 'express';
 import { Roles } from 'src/decorators/roles.decorator';
-import { getUserPermissions } from 'src/utils/get-user-permissions';
 import { GroupsService } from './groups.service';
-import { AppAbility } from '@ticketz/auth';
-import { Action } from 'rxjs/internal/scheduler/Action';
-import { PoliciesGuard } from 'src/auth/guards/policies.guard';
+import { GroupPoliciesGuard } from 'src/auth/guards/group-policies.guard';
 import { CheckPolicies } from 'src/decorators/policies.decorator';
+import { GroupAbility } from '@ticketz/auth';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
 
 @Controller('organizations/:slug/groups')
 export class GroupsController {
@@ -27,6 +25,8 @@ export class GroupsController {
 
   // @UseGuards(PoliciesGuard)
   // @CheckPolicies((ability: AppAbility) => ability.can('create', 'Group'))
+  // @Roles('ADMIN')
+  @UseGuards(RolesGuard)
   @Roles('ADMIN')
   @Post()
   create(
@@ -43,28 +43,33 @@ export class GroupsController {
     return this.groupsService.findAll(slug);
   }
 
-  @Get(':id')
+  @Get(':groupId')
   findOne(
-    @Param('slug') slug: string,
-    @Param('id', ParseIntPipe) id: number,
+    @Param('slug') orgSlug: string,
+    @Param('groupId', ParseIntPipe) groupId: number,
     @Req() req: Request,
   ) {
-    return this.groupsService.findOne(id, slug);
+    return this.groupsService.findOne(groupId, orgSlug);
   }
 
-  // @UseGuards(PoliciesGuard)
-  // @CheckPolicies((ability: AppAbility) => ability.can('update', 'Group'))
+  @UseGuards(GroupPoliciesGuard)
+  @CheckPolicies((ability: GroupAbility) => ability.can('update', 'Group'))
+  // @UseGuards(RolesGuard)
+  // @Roles('ADMIN')
+  @Patch(':groupId')
+  // todo: only admins can update group name. gms can only update group description
+  update(@Param('groupId', ParseIntPipe) groupId: number, @Body() updateGroupDto: any) {
 
-  @Roles('ADMIN')
-  @Patch(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateGroupDto: any) {
-    return this.groupsService.update(id, updateGroupDto);
+    // return ('taliberado');
+    
+    return this.groupsService.update(groupId, updateGroupDto);
   }
 
+  @UseGuards(RolesGuard)
   @Roles('ADMIN')
-  @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.groupsService.remove(+id);
+  @Delete(':groupId')
+  remove(@Param('groupId', ParseIntPipe) groupId: number) {
+    return this.groupsService.remove(+groupId);
   }
 }
 

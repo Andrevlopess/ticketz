@@ -45,11 +45,6 @@ export class MembersController {
     return this.MembersService.add(req.organization.id, user.id);
   }
 
-  // @Patch()
-  // bulkRemove(@Param('id', ParseIntPipe) id: number, @Body() tags: TagSelect[]) {
-  //   return this.MembersService.bulkRemove(id, tags);
-  // }
-
   @Delete(':userId')
   removeTag(
     @Param('id', ParseIntPipe) id: number,

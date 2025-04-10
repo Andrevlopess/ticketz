@@ -10,65 +10,43 @@ import {
   Req,
   UseGuards
 } from '@nestjs/common';
-import { GroupAbility } from '@ticketz/auth';
+import { AppAbility, GroupAbility } from '@ticketz/auth';
 import { UserSelect } from '@ticketz/database';
 import type { Request } from 'express';
-import { PoliciesGuard } from 'src/auth/guards/policies.guard';
-import { CheckPolicies } from 'src/decorators/policies.decorator';
 import { GroupMembersService } from './group-members.service';
+import { GroupPoliciesGuard } from 'src/auth/guards/group-policies.guard';
+import { AppPoliciesGuard } from 'src/auth/guards/app-policies.guard';
+import { CheckPolicies } from 'src/decorators/policies.decorator';
 
 @Controller('organizations/:slug/groups/:groupId/members')
 export class GroupMembersController {
   constructor(private readonly groupMembersService: GroupMembersService) {}
 
-  // @UseGuards(PoliciesGuard)
-  // @CheckPolicies((ability: AppAbility) =>
-  //   ability.can('read', 'Group'),
-  // )
-
-  @UseGuards(PoliciesGuard)
-  @CheckPolicies((ability: GroupAbility) =>
-    ability.can('read', 'GroupMembers'),
-  )
   @Get()
   findMany(
     @Param('slug') slug: string,
     @Param('groupId', ParseIntPipe) groupId: number,
-    @Req() req: Request,
   ) {
     return this.groupMembersService.findMany(groupId, slug);
   }
 
-  @UseGuards(PoliciesGuard)
+  @UseGuards(GroupPoliciesGuard)
   @CheckPolicies((ability: GroupAbility) =>
     ability.can('create', 'GroupMembers'),
   )
   @Post()
   addMember(
     @Param('groupId', ParseIntPipe) groupId: number,
+    @Param('slug') orgSlug: string,
     @Body() user: Pick<UserSelect, 'id'>,
-    @Req() req: Request,
   ) {
-
-    // return {
-    //   user: req.user,
-    //   org: req.organization,
-    // }
-
-    return 'teste'
-
-    return this.groupMembersService.add(groupId, user.id);
+    return this.groupMembersService.add(groupId, user.id, orgSlug);
   }
 
-  // @Patch()
-  // bulkRemove(@Param('id', ParseIntPipe) id: number, @Body() tags: TagSelect[]) {
-  //   return this.groupMembersService.bulkRemove(id, tags);
-  // }
-
-  // @UseGuards(PoliciesGuard)
-  // @CheckPolicies((ability: AppAbility) =>
-  //   ability.can('remove_members', 'Group'),
-  // )
+  @UseGuards(GroupPoliciesGuard)
+  @CheckPolicies((ability: GroupAbility) =>
+    ability.can('delete', 'GroupMembers'),
+  )
   @Delete(':memberId')
   removeMember(
     @Param(
@@ -87,7 +65,6 @@ export class GroupMembersController {
       }),
     )
     userId: number,
-    // @Req() req: Request,/
   ) {
     return this.groupMembersService.remove(groupId, userId);
   }
