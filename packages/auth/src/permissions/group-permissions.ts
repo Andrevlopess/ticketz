@@ -3,8 +3,7 @@ import { GroupRole } from "@ticketz/database";
 import { AppAbility, GroupAbility, GroupMember } from "..";
 import { User } from "../models/user";
 
-
-type GroupRoles = GroupMember["role"]
+type GroupRoles = GroupMember["role"];
 
 type PermissionsByRole = (
   member: GroupMember,
@@ -20,8 +19,9 @@ export const groupPermissions: Record<GroupRoles, PermissionsByRole> = {
   },
   MEMBER(user, { can, cannot }) {
     can("read", "Group");
+    // can("create", "GroupMembers");
   },
-  ANONYMOUS(user, { can, cannot }) {
-    can("read", "GroupMembers");
-  },
+  // ANONYMOUS(user, { can, cannot }) {
+  //   can("read", "GroupMembers");
+  // },
 };

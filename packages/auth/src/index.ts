@@ -18,7 +18,7 @@ export * from "./models/group-member";
 export * from "./models/user";
 
 const appAbilitiesSchema = z.union([
-  userSubject,
+  // userSubject,
   groupSubject,
   z.tuple([z.literal("manage"), z.literal("all")]),
 ]);
