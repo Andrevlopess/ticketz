@@ -30,7 +30,6 @@ export class OrganizationGuard implements CanActivate {
     const request = context.switchToHttp().getRequest() as Request;
 
     // ========== STORE USER ON REQUEST =========
-
     if (!request.params.slug) {
       throw new BadRequestException('Organization slug not provided!');
     }

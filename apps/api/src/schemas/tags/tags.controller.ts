@@ -3,7 +3,7 @@ import { TagsService } from './tags.service';
 import type { TagInsert } from '@ticketz/database';
 
 
-@Controller('tags')
+@Controller('organizations/:slug/tags')
 export class TagsController {
   constructor(private readonly tagsService: TagsService) {}
 

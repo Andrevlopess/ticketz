@@ -45,7 +45,7 @@ export class MembersController {
     return this.MembersService.add(req.organization.id, user.id);
   }
 
-  @Delete(':userId')
+  @Delete(':memberId')
   removeTag(
     @Param('id', ParseIntPipe) id: number,
     @Param('userId', ParseIntPipe) userId: number,

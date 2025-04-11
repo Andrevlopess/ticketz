@@ -77,8 +77,7 @@ export class AuthController {
     return req.user
   }
 
-
-  
+  //temporary
   @Post(':slug/reset_passwords')
   resetPasswords(@Req() req: Request) {
 

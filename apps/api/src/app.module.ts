@@ -26,8 +26,7 @@ import { UsersModule } from './schemas/users/users.module';
     OrganizationsModule,
     GroupsModule,
     MembersModule,
-    CategoriesModule,
-    // CaslModule
+    CategoriesModule
   ],
   controllers: [AppController],
   providers: [
@@ -36,14 +35,6 @@ import { UsersModule } from './schemas/users/users.module';
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
     },
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: RolesGuard,
-    // },
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: PoliciesGuard,
-    // },
   ],
 })
 export class AppModule {}
