@@ -6,11 +6,14 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { TicketsService } from './tickets.service';
 import type { TagInsert, TicketInsert } from '@ticketz/database';
+import { z } from 'zod';
+import type { TicketFieldsToInclude } from 'src/types/ticket';
 
-@Controller('tickets')
+@Controller('/organizations/:slug/tickets')
 export class TicketsController {
   constructor(private readonly ticketsService: TicketsService) {}
 
@@ -20,13 +23,17 @@ export class TicketsController {
   }
 
   @Get()
-  findAll() {
-    return this.ticketsService.findAll();
+  findAll(@Param('slug') orgSlug: string, @Query('includes') includes: string) {
+    return this.ticketsService.findAll(orgSlug, includes);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.ticketsService.findOne(+id);
+  @Get(':ticketId')
+  findOne(
+    @Param('ticketId') ticketId: string,
+    @Param('slug') orgSlug: string,
+    @Query('includes') includes: string,
+  ) {
+    return this.ticketsService.findOne(+ticketId, orgSlug, includes);
   }
 
   @Patch(':id')

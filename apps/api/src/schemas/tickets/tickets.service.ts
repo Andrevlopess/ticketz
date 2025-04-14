@@ -1,15 +1,24 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import {
-  Category,
   GlobalSchema,
+  Organization,
+  Tag,
+  TagsOnTicket,
   Ticket,
+  TicketAssignments,
   TicketInsert,
+  User,
 } from '@ticketz/database';
-import { and, eq, isNull, sql } from 'drizzle-orm';
+import { and, eq, getTableColumns, isNull, sql } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { createUpdateSchema } from 'drizzle-zod';
 import { DrizzleAsyncProvider } from 'src/drizzle/drizzle.provider';
 import { ZodException } from 'src/handlers/zod.exception';
+import {
+  DetailedTicketSelect,
+  TicketFieldsToInclude,
+  TicketFieldsToIncludeSchema,
+} from 'src/types/ticket';
 import { z } from 'zod';
 
 // User is not allowed to update the email
@@ -18,6 +27,7 @@ const TicketUpdateSchema = createUpdateSchema(Ticket)
   .strict();
 
 export type TicketUpdate = z.infer<typeof TicketUpdateSchema>;
+
 @Injectable()
 export class TicketsService {
   constructor(
@@ -31,178 +41,143 @@ export class TicketsService {
     return ticket;
   }
 
-  findAll() {
-    const tickets = this.db.query.Ticket.findMany({
-      columns: {
-        organizationId: false,
-        statusId: false,
-        priorityId: false,
-        groupId: false,
-        categoryId: false,
-        createdById: false,
-      },
-      with: {
-        organization: {
-          columns: {
-            id: true,
-            name: true,
-          },
-        },
-        createdBy: {
-          columns: {
-            id: true,
-            email: true,
-          },
-        },
-        status: {
-          columns: {
-            id: true,
-            name: true,
-          },
-        },
-        group: {
-          columns: {
-            id: true,
-            name: true,
-          },
-        },
-        category: {
-          columns: {
-            id: true,
-            name: true,
-          },
-        },
-        priority: {
-          columns: {
-            id: true,
-            name: true,
-          },
-        },
-        assigneesOnTicket: {
-          columns: {},
-          with: {
-            assigneeId: {
-              columns: {
-                id: true,
-                email: true,
-              },
-            },
-          },
-        },
-        tagsOnTicket: {
-          columns: {},
-          with: {
-            tag: {
-              columns: {
-                id: true,
-                name: true,
-              },
-            },
-          },
-          // tags: {
-          //   columns: {
-          //     id: true,
-          //     name: true,
-          //   },
-          // },
-          // assignees: {
-          //   columns:{
-          //     assigneeId: true
-          //   }
-          // }
-        },
-      },
-      where: isNull(Ticket.deletedAt),
-    });
+  async findAll(orgSlug: string, include: string) {
+    const includes = include.split(',') as TicketFieldsToInclude;
+
+    const {
+      data: includeKeys,
+      success,
+      error,
+    } = TicketFieldsToIncludeSchema.safeParse(includes);
+
+    if (!success) {
+      throw new ZodException(error);
+    }
+
+    const { organizationId, ...ticket } = getTableColumns(Ticket);
+    const { password, updatedAt, deletedAt, createdAt, ...user } =
+      getTableColumns(User);
+    const { name } = getTableColumns(Tag);
+
+    // prettier-ignore
+    const result = await this.db
+      .select({
+        ...getTableColumns(Ticket),
+        tags: name,
+        ...(includeKeys.includes('assignees') ? { assignees: user } : undefined),
+        ...(includeKeys.includes('organization') ? { organization: getTableColumns(Organization) } : undefined),
+      })
+      .from(Ticket)
+      .innerJoin(TagsOnTicket, eq(TagsOnTicket.ticketId, Ticket.id))
+      .innerJoin(Tag, eq(Tag.id, TagsOnTicket.tagId))
+      .innerJoin(TicketAssignments, eq(TicketAssignments.ticketId, Ticket.id))
+      .innerJoin(User, eq(User.id, TicketAssignments.assigneeId))
+      .innerJoin(Organization, eq(Organization.id, Ticket.organizationId))
+      .where(eq(Organization.slug, orgSlug));
+
+    console.log(result);
+
+    const tickets: DetailedTicketSelect[] = [];
+    const map = new Map();
+
+    for (const row of result) {
+      let ticket = map.get(row.id);
+
+      // prettier-ignore
+      if (!ticket) {
+        ticket = {
+          ...row,
+          tags: [],
+          ...(includeKeys.includes('assignees') ? { assignees: [] } : undefined),
+        };
+
+        map.set(row.id, ticket);
+        tickets.push(ticket);
+      }
+
+      if (row.tags && !ticket.tags.some((tag: string) => tag === row.tags)) {
+        ticket.tags.push(row.tags);
+      }
+
+      // prettier-ignore
+      if (row.assignees && !ticket.assignees.some((assignee: any) => assignee.id === row.assignees?.id)) {
+        ticket.assignees.push(row.assignees);
+      }
+    }
 
     return tickets;
   }
 
-  async findOne(id: number) {
-    const ticket = await this.db.query.Ticket.findFirst({
-      columns: {
-        organizationId: false,
-        statusId: false,
-        priorityId: false,
-        groupId: false,
-        categoryId: false,
-        createdById: false,
-      },
-      with: {
-        organization: {
-          columns: {
-            id: true,
-            name: true,
-          },
-        },
-        createdBy: {
-          columns: {
-            id: true,
-            email: true,
-          },
-        },
-        status: {
-          columns: {
-            id: true,
-            name: true,
-          },
-        },
-        group: {
-          columns: {
-            id: true,
-            name: true,
-          },
-        },
-        category: {
-          columns: {
-            id: true,
-            name: true,
-          },
-        },
-        priority: {
-          columns: {
-            id: true,
-            name: true,
-          },
-        },
-        assigneesOnTicket: {
-          columns: {},
-          with: {
-            assigneeId: {
-              columns: {
-                id: true,
-                email: true,
-              },
-            },
-          },
-        },
-        tagsOnTicket: {
-          columns: {},
-          with: {
-            tag: {
-              columns: {
-                id: true,
-                name: true,
-              },
-            },
-          },
-          // tags: {
-          //   columns: {
-          //     id: true,
-          //     name: true,
-          //   },
-          // },
-          // assignees: {
-          //   columns:{
-          //     assigneeId: true
-          //   }
-          // }
-        },
-      },
-      where: and(eq(Ticket.id, id), isNull(Ticket.deletedAt)),
-    });
+  async findOne(ticketId: number, orgSlug: string, include?: string) {
 
-    return ticket;
+    const includes = include?.split(',') as TicketFieldsToInclude;
+
+    const {
+      data: includeKeys,
+      success,
+      error,
+    } = TicketFieldsToIncludeSchema.safeParse(includes);
+
+    if (!success) {
+      throw new ZodException(error);
+    }
+
+    const { organizationId, ...ticket } = getTableColumns(Ticket);
+    const { password, updatedAt, deletedAt, createdAt, ...user } =
+      getTableColumns(User);
+    const { name } = getTableColumns(Tag);
+
+    // prettier-ignore
+    const result = await this.db
+      .select({
+        ...getTableColumns(Ticket),
+        tags: name,
+        ...(includeKeys.includes('assignees') ? { assignees: user } : undefined),
+        ...(includeKeys.includes('organization') ? { organization: getTableColumns(Organization) } : undefined),
+      })
+      .from(Ticket)
+      .innerJoin(TagsOnTicket, eq(TagsOnTicket.ticketId, Ticket.id))
+      .innerJoin(Tag, eq(Tag.id, TagsOnTicket.tagId))
+      .innerJoin(TicketAssignments, eq(TicketAssignments.ticketId, Ticket.id))
+      .innerJoin(User, eq(User.id, TicketAssignments.assigneeId))
+      .innerJoin(Organization, eq(Organization.id, Ticket.organizationId))
+      .where(
+        and(
+          eq(Organization.slug, orgSlug), 
+          eq(Ticket.id, ticketId))
+        );
+
+    console.log(result);
+
+    const tickets: DetailedTicketSelect[] = [];
+    const map = new Map();
+
+    for (const row of result) {
+      let ticket = map.get(row.id);
+
+      // prettier-ignore
+      if (!ticket) {
+        ticket = {
+          ...row,
+          tags: [],
+          ...(includeKeys.includes('assignees') ? { assignees: [] } : undefined),
+        };
+
+        map.set(row.id, ticket);
+        tickets.push(ticket);
+      }
+
+      if (row.tags && !ticket.tags.some((tag: string) => tag === row.tags)) {
+        ticket.tags.push(row.tags);
+      }
+
+      // prettier-ignore
+      if (row.assignees && !ticket.assignees.some((assignee: any) => assignee.id === row.assignees?.id)) {
+        ticket.assignees.push(row.assignees);
+      }
+    }
+
+    return tickets;
   }
 
   update(id: number, updateTicketDto: TicketUpdate) {

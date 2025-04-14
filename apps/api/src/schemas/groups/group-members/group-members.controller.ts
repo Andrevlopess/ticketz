@@ -43,10 +43,10 @@ export class GroupMembersController {
     return this.groupMembersService.add(groupId, user.id, orgSlug);
   }
 
-  @UseGuards(GroupPoliciesGuard)
-  @CheckPolicies((ability: GroupAbility) =>
-    ability.can('delete', 'GroupMembers'),
-  )
+  // @UseGuards(GroupPoliciesGuard)
+  // @CheckPolicies((ability: GroupAbility) =>
+  //   ability.can('delete', 'GroupMembers'),
+  // )
   @Delete(':memberId')
   removeMember(
     @Param(
