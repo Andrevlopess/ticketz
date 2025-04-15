@@ -22,19 +22,19 @@ import { RolesGuard } from 'src/auth/guards/roles.guard';
 @Controller('organizations/:slug/groups')
 export class GroupsController {
   constructor(private readonly groupsService: GroupsService) {}
-
   // @UseGuards(PoliciesGuard)
   // @CheckPolicies((ability: AppAbility) => ability.can('create', 'Group'))
   // @Roles('ADMIN')
+
+
   @UseGuards(RolesGuard)
   @Roles('ADMIN')
   @Post()
   create(
     @Param('slug') slug: string,
     @Body() createGroupDto: GroupInsert,
-    @Req() req: Request,
   ) {
-    return this.groupsService.create(createGroupDto);
+    return this.groupsService.create(createGroupDto, slug);
   }
 
   // @Roles('USER')
@@ -59,8 +59,6 @@ export class GroupsController {
   @Patch(':groupId')
   // todo: only admins can update group name. gms can only update group description
   update(@Param('groupId', ParseIntPipe) groupId: number, @Body() updateGroupDto: any) {
-
-    // return ('taliberado');
     
     return this.groupsService.update(groupId, updateGroupDto);
   }

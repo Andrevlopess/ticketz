@@ -9,9 +9,10 @@ import {
   TicketInsert,
   User,
 } from '@ticketz/database';
-import { and, eq, getTableColumns, isNull, sql } from 'drizzle-orm';
+import { aliasedTable, and, eq, getTableColumns, sql } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { createUpdateSchema } from 'drizzle-zod';
+import { QueryBuilder } from 'drizzle-orm/pg-core';
+import { createInsertSchema, createUpdateSchema } from 'drizzle-zod';
 import { DrizzleAsyncProvider } from 'src/drizzle/drizzle.provider';
 import { ZodException } from 'src/handlers/zod.exception';
 import {
@@ -19,6 +20,7 @@ import {
   TicketFieldsToInclude,
   TicketFieldsToIncludeSchema,
 } from 'src/types/ticket';
+import selectTableColumns from 'src/utils/select-table-columns';
 import { z } from 'zod';
 
 // User is not allowed to update the email
@@ -35,81 +37,60 @@ export class TicketsService {
     private db: NodePgDatabase<typeof GlobalSchema>,
   ) {}
 
-  create(createTicketDto: TicketInsert) {
-    const ticket = this.db.insert(Ticket).values(createTicketDto).returning();
+  async create(createTicketDto: TicketInsert, slug: string) {
+    const parsed = createInsertSchema(Ticket)
+      .omit({ organizationId: true })
+      .safeParse(createTicketDto);
 
-    return ticket;
-  }
+    if (!parsed.success) throw new ZodException(parsed.error);
 
-  async findAll(orgSlug: string, include: string) {
-    const includes = include.split(',') as TicketFieldsToInclude;
+    //     const [group] = await this.db.transaction(async (trx) => {
+    //       const [alreadyExists] = await trx
+    //         .select()
+    //         .from(Group)
+    //         .where(
+    //           and(
+    //             eq(Group.name, createGroupDto.name),
+    //             eq(Group.organizationId, createGroupDto.organizationId),
+    //           ),
+    //         );
 
-    const {
-      data: includeKeys,
-      success,
-      error,
-    } = TicketFieldsToIncludeSchema.safeParse(includes);
+    //       if (alreadyExists)
+    //         throw new BadRequestException(
+    //           `Group '${createGroupDto.name}' already exists!`,
+    //         );
 
-    if (!success) {
-      throw new ZodException(error);
+    //       return trx.insert(Group).values(createGroupDto).returning();
+    //     });
+
+    //     return group;
+
+    // const db = new QueryBuilder();
+
+    const orgId = await this.db
+      .select()
+      .from(Organization)
+      .where(eq(Organization.slug, slug))
+      .limit(1);
+
+    if (!orgId[0]) {
+      throw new BadRequestException(
+        `Organization with slug '${slug}' not found`,
+      );
     }
 
-    const { organizationId, ...ticket } = getTableColumns(Ticket);
-    const { password, updatedAt, deletedAt, createdAt, ...user } =
-      getTableColumns(User);
-    const { name } = getTableColumns(Tag);
-
-    // prettier-ignore
-    const result = await this.db
-      .select({
-        ...getTableColumns(Ticket),
-        tags: name,
-        ...(includeKeys.includes('assignees') ? { assignees: user } : undefined),
-        ...(includeKeys.includes('organization') ? { organization: getTableColumns(Organization) } : undefined),
+    const ticket = await this.db
+      .insert(Ticket)
+      .values({
+        ...parsed.data,
+        organizationId: orgId[0].id,
       })
-      .from(Ticket)
-      .innerJoin(TagsOnTicket, eq(TagsOnTicket.ticketId, Ticket.id))
-      .innerJoin(Tag, eq(Tag.id, TagsOnTicket.tagId))
-      .innerJoin(TicketAssignments, eq(TicketAssignments.ticketId, Ticket.id))
-      .innerJoin(User, eq(User.id, TicketAssignments.assigneeId))
-      .innerJoin(Organization, eq(Organization.id, Ticket.organizationId))
-      .where(eq(Organization.slug, orgSlug));
-
-    console.log(result);
-
-    const tickets: DetailedTicketSelect[] = [];
-    const map = new Map();
-
-    for (const row of result) {
-      let ticket = map.get(row.id);
-
-      // prettier-ignore
-      if (!ticket) {
-        ticket = {
-          ...row,
-          tags: [],
-          ...(includeKeys.includes('assignees') ? { assignees: [] } : undefined),
-        };
-
-        map.set(row.id, ticket);
-        tickets.push(ticket);
-      }
-
-      if (row.tags && !ticket.tags.some((tag: string) => tag === row.tags)) {
-        ticket.tags.push(row.tags);
-      }
-
-      // prettier-ignore
-      if (row.assignees && !ticket.assignees.some((assignee: any) => assignee.id === row.assignees?.id)) {
-        ticket.assignees.push(row.assignees);
-      }
-    }
-
-    return tickets;
+      .returning();
+    return ticket;
+    // return 'faz o eli';
   }
 
-  async findOne(ticketId: number, orgSlug: string, include?: string) {
-
+  async find(orgSlug: string, include: string, ticketId?: number) {
     const includes = include?.split(',') as TicketFieldsToInclude;
 
     const {
@@ -122,32 +103,47 @@ export class TicketsService {
       throw new ZodException(error);
     }
 
-    const { organizationId, ...ticket } = getTableColumns(Ticket);
-    const { password, updatedAt, deletedAt, createdAt, ...user } =
-      getTableColumns(User);
-    const { name } = getTableColumns(Tag);
+    const Creator = aliasedTable(User, 'Creator');
+
+    const { organizationId, createdById, ...ticket } = getTableColumns(Ticket);
 
     // prettier-ignore
-    const result = await this.db
+    const user = selectTableColumns(User, [ 'id', 'name', 'email', 'jobTitle', 'photoUrl', 'phone']);
+    // prettier-ignore
+    const creator = selectTableColumns(Creator, [ 'id', 'name', 'email', 'jobTitle', 'photoUrl', 'phone']);
+    // prettier-ignore
+    const organization = selectTableColumns(Organization, [ 'id', 'name', 'logoUrl', 'description']);
+
+    // prettier-ignore
+    const query = this.db
       .select({
-        ...getTableColumns(Ticket),
-        tags: name,
+        ...ticket,
+        tags: Tag.name,
+        ...(includeKeys.includes('creator') ? { creator: creator } : undefined),
         ...(includeKeys.includes('assignees') ? { assignees: user } : undefined),
-        ...(includeKeys.includes('organization') ? { organization: getTableColumns(Organization) } : undefined),
+        ...(includeKeys.includes('organization') ? { organization: organization } : undefined),
       })
       .from(Ticket)
       .innerJoin(TagsOnTicket, eq(TagsOnTicket.ticketId, Ticket.id))
       .innerJoin(Tag, eq(Tag.id, TagsOnTicket.tagId))
-      .innerJoin(TicketAssignments, eq(TicketAssignments.ticketId, Ticket.id))
-      .innerJoin(User, eq(User.id, TicketAssignments.assigneeId))
       .innerJoin(Organization, eq(Organization.id, Ticket.organizationId))
       .where(
         and(
-          eq(Organization.slug, orgSlug), 
-          eq(Ticket.id, ticketId))
-        );
+          eq(Organization.slug, orgSlug),
+          ticketId ? eq(Ticket.id, ticketId) : undefined,
+        ),
+      );
 
-    console.log(result);
+    if (includeKeys.includes('assignees')) {
+      query
+        .innerJoin(TicketAssignments, eq(TicketAssignments.ticketId, Ticket.id))
+        .innerJoin(User, eq(User.id, TicketAssignments.assigneeId));
+    }
+
+    if (includeKeys.includes('creator')) {
+      query.innerJoin(Creator, eq(Creator.id, Ticket.createdById));
+    }
+    const result = await query;
 
     const tickets: DetailedTicketSelect[] = [];
     const map = new Map();
@@ -172,12 +168,12 @@ export class TicketsService {
       }
 
       // prettier-ignore
-      if (row.assignees && !ticket.assignees.some((assignee: any) => assignee.id === row.assignees?.id)) {
+      if (row.assignees && !ticket.assignees.some((assignee: typeof user) => +assignee.id === row.assignees?.id)) {
         ticket.assignees.push(row.assignees);
       }
     }
 
-    return tickets;
+    return ticketId ? tickets[0] : tickets;
   }
 
   update(id: number, updateTicketDto: TicketUpdate) {

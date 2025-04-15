@@ -23,11 +23,11 @@ export class GroupMembersController {
   constructor(private readonly groupMembersService: GroupMembersService) {}
 
   @Get()
-  findMany(
+  findOne(
     @Param('slug') slug: string,
     @Param('groupId', ParseIntPipe) groupId: number,
   ) {
-    return this.groupMembersService.findMany(groupId, slug);
+    return this.groupMembersService.findOne(groupId, slug);
   }
 
   @UseGuards(GroupPoliciesGuard)

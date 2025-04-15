@@ -3,7 +3,7 @@ import { PublicUser } from "./user";
 import z from "zod";
 
 
-export const TicketFieldsToIncludeSchema = z.array(z.enum(['assignees', 'organization']))
+export const TicketFieldsToIncludeSchema = z.array(z.enum(['assignees', 'organization', 'creator'])).optional().default([])
 export type TicketFieldsToInclude =  z.infer<typeof TicketFieldsToIncludeSchema>
 
 export interface DetailedTicketSelect extends TicketSelect {

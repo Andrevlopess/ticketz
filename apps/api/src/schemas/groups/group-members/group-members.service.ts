@@ -24,10 +24,9 @@ export class GroupMembersService {
   constructor(
     @Inject(DrizzleAsyncProvider)
     private db: NodePgDatabase<typeof GlobalSchema>,
-    // private caslAbilityFactory: CaslAbilityFactory,
   ) {}
 
-  findMany(groupId: number, slug: string) {
+  findOne(groupId: number, slug: string) {
     const groupMembers = this.db.transaction(async (trx) => {
       const [group] = await trx
         .select()
@@ -102,7 +101,6 @@ export class GroupMembersService {
       throw new BadRequestException(
         'User is not a member of the company of this group!',
       );
-
 
     const [newMember] = await this.db
       .insert(GroupMembership)

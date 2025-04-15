@@ -32,7 +32,7 @@ export class GroupsService {
     private db: NodePgDatabase<typeof GlobalSchema>,
   ) {}
 
-  async create(createGroupDto: GroupInsert) {
+  async create(createGroupDto: GroupInsert, slug: string) {
     const parsed = createInsertSchema(Group).safeParse(createGroupDto);
 
     if (!parsed.success) throw new ZodException(parsed.error);

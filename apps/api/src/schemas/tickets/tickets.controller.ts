@@ -18,22 +18,25 @@ export class TicketsController {
   constructor(private readonly ticketsService: TicketsService) {}
 
   @Post()
-  create(@Body() createTicketDto: TicketInsert) {
-    return this.ticketsService.create(createTicketDto);
+  create(
+    @Body() createTicketDto: TicketInsert,
+    @Param('slug') orgSlug: string,
+  ) {
+    return this.ticketsService.create(createTicketDto, orgSlug);
   }
 
   @Get()
-  findAll(@Param('slug') orgSlug: string, @Query('includes') includes: string) {
-    return this.ticketsService.findAll(orgSlug, includes);
+  findAll(@Param('slug') orgSlug: string, @Query('include') include: string) {
+    return this.ticketsService.find(orgSlug, include);
   }
 
   @Get(':ticketId')
   findOne(
     @Param('ticketId') ticketId: string,
     @Param('slug') orgSlug: string,
-    @Query('includes') includes: string,
+    @Query('include') include: string,
   ) {
-    return this.ticketsService.findOne(+ticketId, orgSlug, includes);
+    return this.ticketsService.find(orgSlug, include, +ticketId);
   }
 
   @Patch(':id')
